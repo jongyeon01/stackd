@@ -61,7 +61,7 @@ const WORDFIELD: Array<[string, string]> = [
 // 빌더에 실을 필드만 — id·user_id·작성자 스냅샷은 저장 시 서버가 다시 채운다 (BR-025)
 const EDIT_COLUMNS = "title, situation_short, situation, steps, dev_stack, role, accent, is_public";
 
-// SCR-001 홈 v3 — 캐러셀 히어로 + 쇼케이스 + 과정 레일 + 빌더 (Day 8 시안 이식)
+// SCR-001 홈 v3 — 캐러셀 히어로 + 과정 레일 + 빌더 (쇼케이스는 11/22 제거)
 export default async function Home({ searchParams }: { searchParams: Promise<{ edit?: string }> }) {
   const { edit } = await searchParams;
   // 로그인 사용자의 소속 기본값 — 없거나 실패하면 빈 값 (REQ-HOME-004 AC-3)
@@ -239,27 +239,6 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ e
             </div>
           </article>
         </HomeCarousel>
-      </section>
-
-      {/* 카드 쇼케이스 (EL-HOME-020) — 슬라이드 1의 카드를 실물 크기 블리드로 */}
-      <section aria-label="카드 실물 보기" className="relative overflow-hidden border-t border-border py-16 sm:py-24">
-        {/* 스크롤 리빌 (ANIMATION.md #6) — 콘텐츠는 서버 렌더 유지 */}
-        <ScrollReveal className="container-page grid grid-cols-1 items-center gap-12 md:grid-cols-2">
-          <div data-reveal="left">
-            <h2 className="text-2xl sm:text-3xl">방금 그 카드, 펼치면 이렇습니다</h2>
-            <p className="mt-3 max-w-[62ch] text-muted-foreground">
-              채팅에 실려 있던 카드 그대로예요. 상황 한 줄, 단계 레일, 개발 스택까지 — 한 장에 담겨요.
-            </p>
-          </div>
-          <div data-reveal="right" className="flex justify-center md:justify-end">
-            {/* 모바일·md는 블리드 없이 온전히(0.58), lg는 0.8 콘텐츠 안 수렴(뷰포트 우측 32px 여백 — 가장자리 밀착 답답함 해소),
-                원본(1.0)·-10vw 블리드는 xl+(1280부터 여백이 뻗침을 흡수, 8/25 실측) */}
-            <ScaledCard
-              className="[--s:0.58] sm:-mr-[12vw] sm:[--s:0.9] md:mr-0 md:[--s:0.58] lg:mr-0 lg:[--s:0.8] xl:-mr-[10vw] xl:[--s:1]"
-              cardClassName="shadow-[0_24px_56px_-16px_rgba(17,20,25,0.16)]"
-            />
-          </div>
-        </ScrollReveal>
       </section>
 
       {/* 과정 레일 (EL-HOME-021) — 시그니처 단계 레일 조형 재사용 */}
