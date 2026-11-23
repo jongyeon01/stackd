@@ -108,10 +108,10 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ e
               다른 개발자들은 어떤 도구를, 어떤 순서로 사용할까요? 실제 AI 워크플로우를 발견하고 내 작업 방식으로 만들어 보세요.
             </p>
             <div className="mt-8 flex flex-wrap gap-3">
-              <Link href="/workflows" className={`${buttonVariants({ size: "lg" })} h-12 px-6 text-base`}>
+              <Link href="/workflows" className={buttonVariants({ size: "lg", className: "h-12 px-6 text-base" })}>
                 워크플로우 탐색하기 <ArrowUpRight aria-hidden />
               </Link>
-              <Link href="/create" className={`${buttonVariants({ size: "lg", variant: "outline" })} h-12 px-6 text-base`}>
+              <Link href="/create" className={buttonVariants({ size: "lg", variant: "outline", className: "h-12 px-6 text-base" })}>
                 내 워크플로우 공유하기
               </Link>
             </div>
@@ -198,7 +198,7 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ e
         <div className="container-page grid justify-items-center gap-3 text-center">
           <h2 id="cta-title" className="text-2xl sm:text-3xl">당신의 작업 방식도 누군가에게 도움이 됩니다.</h2>
           <p className="text-muted-foreground">자신만의 AI 워크플로우를 카드 한 장으로 정리해 보세요.</p>
-          <Link href="/create" className={`${buttonVariants({ size: "lg" })} mt-5 h-12 px-6 text-base`}>
+          <Link href="/create" className={buttonVariants({ size: "lg", className: "mt-5 h-12 px-6 text-base" })}>
             내 워크플로우 만들기 <ArrowUpRight aria-hidden />
           </Link>
         </div>
