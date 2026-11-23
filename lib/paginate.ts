@@ -39,3 +39,13 @@ export function pageWindow(current: number, total: number): PageWindowItem[] {
   }
   return result;
 }
+
+// 라이브러리 링크 — 주제·검색어를 유지한 채 페이지·칩을 바꾼다 (REQ-LIB-003·004). 빈 값·1페이지는 생략
+export function libraryHref({ topic, q, page }: { topic?: string | null; q?: string; page?: number }) {
+  const sp = new URLSearchParams();
+  if (topic) sp.set("topic", topic);
+  if (q) sp.set("q", q);
+  if (page && page > 1) sp.set("page", String(page));
+  const s = sp.toString();
+  return s ? `/workflows?${s}` : "/workflows";
+}
