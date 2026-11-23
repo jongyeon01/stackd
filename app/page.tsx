@@ -113,7 +113,6 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ e
                 내 워크플로우 공유하기
               </Link>
             </div>
-            <p className="mt-5 text-sm text-muted-foreground">도구 목록을 넘어, 실제 사용하는 순서와 이유까지.</p>
           </div>
 
           {/* 0번 카드 — 겹친 판 위에 살짝 기울여 "카드 묶음"으로 (시안 구성, 복제 링크는 2026-11-23 사용자 요청으로 제거) */}
