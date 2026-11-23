@@ -25,7 +25,7 @@
 - 작업 브랜치 → Vercel 프리뷰 배포에서 확인 → main 머지(= 프로덕션 배포)
 - main 직커밋은 핫픽스만
 - 커밋 규칙: Conventional Commits(feat/fix/docs/chore/refactor). 트러블슈팅 해결 커밋 메시지에 원인·해결 한 줄 포함
-- **`docs/`는 로컬 전용**(2026-11-23 추적 해제, `.gitignore`) — GitHub에 없으니 백업은 직접. 과거 커밋 이력에는 남아 있음
+- **`docs/`·`TODO.md`·`backlog.md`는 로컬 전용**(2026-11-23 추적 해제, `.gitignore`) — GitHub에 없으니 백업은 직접. 과거 커밋 이력에는 남아 있음
 
 ## 핵심 원칙
 
