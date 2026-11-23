@@ -14,7 +14,20 @@ export const LIMITS = {
   role: { min: 0, max: 20 }, // BR-008
   feedback_body: { min: 1, max: 500 }, // BR-021
   hidden_reason: { min: 1, max: 200 }, // BR-018
+  expected_result: { min: 0, max: 300 }, // BR-028 (2.0)
+  prerequisites: { min: 0, max: 500 }, // BR-028
+  caveats: { min: 0, max: 500 }, // BR-028
+  tested_env: { min: 0, max: 200 }, // BR-028 — 작성자 자기 신고
+  step_prompt: { min: 0, max: 2000 }, // BR-028
+  search_q: { max: 50 }, // BR-033
 } as const;
+
+// 주제 enum 6종 (BR-029) — 순서 = 칩 표시 순서 (CPY-COMMON-011)
+export const TOPICS = ["build", "review", "test", "debug", "deploy", "automation"] as const;
+export type Topic = (typeof TOPICS)[number];
+
+// 상세 템플릿 선택 필드 (BR-028) — 검증·초안·복제가 같은 목록을 돈다
+export const DETAIL_FIELDS = ["expected_result", "prerequisites", "caveats", "tested_env"] as const;
 
 // 카테고리 enum 7종 (BR-004) — dev_stack은 앞 3종만
 export const CATEGORIES = ["language", "framework", "tool", "skill", "plugin", "mcp", "agent"] as const;
@@ -29,11 +42,16 @@ export type WorkflowInput = {
   title: string;
   situation_short: string;
   situation: string;
-  steps: { tool: { name: string; category: Category; custom?: boolean; url?: string }; note: string; detail: string }[];
+  steps: { tool: { name: string; category: Category; custom?: boolean; url?: string }; note: string; detail: string; prompt?: string }[];
   dev_stack: { name: string; category: DevStackCategory }[];
   role: string;
   accent: string;
   is_public: boolean;
+  topic: Topic;
+  expected_result: string;
+  prerequisites: string;
+  caveats: string;
+  tested_env: string;
 };
 
 // "자" = 사용자가 보는 글자 수 (grapheme) — 이모지 1개 = 1자 (BR-003)
@@ -104,7 +122,13 @@ export function validateWorkflow(input: unknown): Result<WorkflowInput> {
     const url = toolUrl(tool.url);
     if (url === null) return fail("ERR-BLDR-009", `steps.${i}.tool.url`);
     if (url) t.url = url;
-    steps.push({ tool: t, note, detail });
+    // 프롬프트 (BR-028) — 원문 보존(trim 안 함, 복사용 BR-032). 공백뿐이면 키 제거
+    const step: WorkflowInput["steps"][number] = { tool: t, note, detail };
+    if (s.prompt !== undefined && s.prompt !== null) {
+      if (typeof s.prompt !== "string" || charCount(s.prompt) > LIMITS.step_prompt.max) return fail("ERR-BLDR-010", `steps.${i}.prompt`);
+      if (s.prompt.trim()) step.prompt = s.prompt;
+    }
+    steps.push(step);
   }
 
   const rawStack = d.dev_stack ?? [];
@@ -122,12 +146,23 @@ export function validateWorkflow(input: unknown): Result<WorkflowInput> {
   if (!roleResult.ok) return roleResult;
   const role = roleResult.value;
 
+  const topic = parseTopic(d.topic);
+  if (topic === null) return fail("ERR-BLDR-011", "topic");
+  const detailValues = {} as Record<(typeof DETAIL_FIELDS)[number], string>;
+  for (const k of DETAIL_FIELDS) {
+    const v = str(d[k] ?? "", LIMITS[k]);
+    if (v === null) return fail("ERR-BLDR-010", k);
+    detailValues[k] = v;
+  }
+
   return {
     ok: true,
     value: {
       title, situation_short, situation, steps, dev_stack, role,
       accent: typeof d.accent === "string" && d.accent ? d.accent : "ink", // 미인식 슬러그는 서버가 팔레트로 재확인
       is_public: d.is_public !== false, // 기본 true (BR-017)
+      topic,
+      ...detailValues,
     },
   };
 }
@@ -155,4 +190,20 @@ export function validateFeedbackBody(body: unknown): Result<string> {
 export function validateHiddenReason(reason: unknown): Result<string> {
   const t = str(reason, LIMITS.hidden_reason);
   return t === null ? fail("ERR-ADMIN-002", "reason") : { ok: true, value: t };
+}
+
+// 주제 파싱 (BR-029) — enum 밖은 null (라이브러리는 무시, 저장은 거부)
+export function parseTopic(v: unknown): Topic | null {
+  return isIn(TOPICS, v) ? v : null;
+}
+
+// 검색어 정규화 (BR-033) — trim 후 50자 절삭, 없으면 ""
+export function normalizeQuery(v: unknown): string {
+  if (typeof v !== "string") return "";
+  return [...segmenter.segment(v.trim())].slice(0, LIMITS.search_q.max).map((s) => s.segment).join("");
+}
+
+// ilike 패턴 — 소문자 search_text와 맞추고 와일드카드는 리터럴로 (BR-033)
+export function likePattern(q: string): string {
+  return `%${q.toLowerCase().replace(/[\\%_]/g, (c) => `\\${c}`)}%`;
 }

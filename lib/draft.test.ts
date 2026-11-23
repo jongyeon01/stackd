@@ -72,3 +72,20 @@ test("localStorage 예외(프라이빗 모드 등)는 삼킨다", () => {
   assert.equal(loadDraft(), null);
   (globalThis as unknown as { localStorage: Storage }).localStorage = broken;
 });
+
+// TC-HOME-010-02: 2.0 이전 초안(새 키 없음)도 폐기하지 않고 빈 값으로 채워 복원 (PRD-05 — v 유지)
+test("2.0 키 없는 구 초안 → 빈 값 보충 후 복원", () => {
+  const old = { v: 2, title: "옛 초안", situation_short: "", situation: "", steps: [], dev_stack: [], role: "", accent: "ink", is_public: true };
+  store.set(DRAFT_KEY, JSON.stringify(old));
+  const d = loadDraft();
+  assert.ok(d);
+  assert.equal(d.title, "옛 초안");
+  assert.equal(d.topic, "");
+  assert.equal(d.expected_result, "");
+  assert.equal(d.tested_env, "");
+});
+
+test("isDraftEmpty: 2.0 필드만 입력해도 false", () => {
+  assert.equal(isDraftEmpty({ ...EMPTY_DRAFT, topic: "debug" }), false);
+  assert.equal(isDraftEmpty({ ...EMPTY_DRAFT, caveats: "비용 주의" }), false);
+});
