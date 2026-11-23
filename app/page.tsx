@@ -24,8 +24,6 @@ export const metadata: Metadata = {
   openGraph: { ...BASE_OG, title: TITLE, description: DESCRIPTION, url: "/" },
 };
 
-// 0번 카드 = DB 934c9228 (SCR-009 EL-LAND-003)
-const HERO_CARD_ID = "934c9228";
 const LIST_COLUMNS = "id, title, situation_short, steps, dev_stack, topic, author_handle";
 
 // 사용 방법 4단계 (EL-LAND-006 · CPY-LAND-015~018) — 3번 "만들기"는 사용자 추가
@@ -118,7 +116,7 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ e
             <p className="mt-5 text-sm text-muted-foreground">도구 목록을 넘어, 실제 사용하는 순서와 이유까지.</p>
           </div>
 
-          {/* 0번 카드 — 겹친 판 위에 살짝 기울여 "카드 묶음"으로 (시안 구성) */}
+          {/* 0번 카드 — 겹친 판 위에 살짝 기울여 "카드 묶음"으로 (시안 구성, 복제 링크는 2026-11-23 사용자 요청으로 제거) */}
           <div aria-label="예시 워크플로우 카드" role="group" className="relative mx-auto [--s:0.56] sm:[--s:0.66] lg:[--s:0.7]">
             <div aria-hidden className="absolute inset-x-0 top-0 h-[calc(700px*var(--s))] -rotate-6 rounded-xl border border-border bg-muted" />
             <div className="relative rotate-2 overflow-hidden rounded-xl shadow-[0_24px_48px_-24px_rgba(17,20,25,0.35)]">
@@ -128,12 +126,6 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ e
                 </div>
               </div>
             </div>
-            <Link
-              href={`/card-detail/${HERO_CARD_ID}`}
-              className="relative mt-6 inline-flex items-center gap-1 py-2 text-sm font-medium text-primary underline-offset-4 hover:underline"
-            >
-              <ArrowUpRight aria-hidden className="size-4" /> 내 방식으로 복제
-            </Link>
           </div>
         </div>
       </section>
