@@ -72,3 +72,6 @@ next-env.d.ts
 
 # 문서 전체 — 로컬 전용, GitHub 업로드 제외(2026-11-23)
 /docs/
+# 작업 목록·백로그 — 로컬 전용(2026-11-23)
+/TODO.md
+/backlog.md
