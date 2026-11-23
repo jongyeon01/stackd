@@ -1,70 +1,63 @@
 import type { Metadata } from "next";
-import BackToTop from "@/components/back-to-top";
-import DraftBanner from "@/components/draft-banner";
-import HeroIntro from "@/components/hero-intro";
-import HomeCarousel from "@/components/home-carousel";
-import JsonLd from "@/components/json-ld";
-import ScrollReveal from "@/components/scroll-reveal";
-import { Button, buttonVariants } from "@/components/ui/button";
-import WorkflowCard from "@/components/workflow-card";
-import { HERO_CARD } from "@/lib/hero-card";
-import { BASE_OG, SITE_DESCRIPTION, SITE_NAME, SITE_URL } from "@/lib/site";
+import Link from "next/link";
 import { redirect } from "next/navigation";
+import { ArrowUpRight, Copy, PenLine, Search, Share2 } from "lucide-react";
+import DraftBanner from "@/components/draft-banner";
+import JsonLd from "@/components/json-ld";
+import { buttonVariants } from "@/components/ui/button";
+import WorkflowCard from "@/components/workflow-card";
+import WorkflowListCard from "@/components/workflow-list-card";
+import { SearchForm, TopicChips } from "@/components/workflow-search";
+import { HERO_CARD } from "@/lib/hero-card";
+import { BASE_OG, SITE_NAME, SITE_URL } from "@/lib/site";
+import { createClient } from "@/lib/supabase/server";
 
-// SCR-001 홈 메타 — 제목·설명은 PRD-04 표 그대로. OG는 app/opengraph-image.tsx 상속
+// SCR-009 랜딩 메타 (PRD-04 v3 `/` 행 — OQ-014 시안 그대로 확정)
+const TITLE = "Stackd(스택드) — 개발자들의 AI 워크플로우 찾고 내 것으로 만들기";
+const DESCRIPTION =
+  "다른 개발자들은 어떤 AI 도구를 어떤 순서로 쓸까요? 실제 워크플로우를 찾아 저장하고, 내 방식으로 복제해 보세요.";
+
 export const metadata: Metadata = {
-  title: { absolute: "Stackd(스택드) — 내 AI 워크플로우 카드 만들기" },
+  title: { absolute: TITLE },
+  description: DESCRIPTION,
   alternates: { canonical: "/" },
-  openGraph: { ...BASE_OG, title: "Stackd(스택드) — 내 AI 워크플로우 카드 만들기", url: "/" },
+  openGraph: { ...BASE_OG, title: TITLE, description: DESCRIPTION, url: "/" },
 };
 
-// 0번 카드 축소 렌더 (EL-HOME-003) — 배율은 호출부 --s, 값은 DESIGN.md §홈 캐러셀 조판
-function ScaledCard({ className = "", cardClassName = "" }: { className?: string; cardClassName?: string }) {
-  return (
-    /* overflow-hidden — scale은 페인트만 축소, 레이아웃 560px이 그리드 최소폭을 밀지 않게 */
-    <div className={`h-[calc(700px*var(--s))] w-[calc(560px*var(--s))] overflow-hidden ${className}`}>
-      <div className="origin-top-left [transform:scale(var(--s))]">
-        <WorkflowCard workflow={HERO_CARD} handle="kjjyyy01" className={cardClassName} />
-      </div>
-    </div>
-  );
-}
+// 0번 카드 = DB 934c9228 (SCR-009 EL-LAND-003)
+const HERO_CARD_ID = "934c9228";
+const LIST_COLUMNS = "id, title, situation_short, steps, dev_stack, topic, author_handle";
 
-// 슬라이드 공통 프레임 — 풀뷰포트 높이·내부 폭 72rem (DESIGN.md §홈 캐러셀 조판)
-const SLIDE = "relative w-full overflow-hidden";
-// 풀뷰포트 높이는 lg+에서만 — lg 미만은 세로 스택이라 콘텐츠가 높이를 정한다
-// 왼쪽 = 페이지 컨테이너 축(64rem+lg:px-8), 오른쪽만 72rem까지 넓힘 (DESIGN.md 예외: 넓되 좌측 축 유지)
-const SLIDE_INNER =
-  "relative z-[1] grid w-full grid-cols-1 items-center gap-6 px-4 py-12 sm:gap-10 sm:px-6 sm:py-16 md:grid-cols-[5fr_6fr] lg:min-h-[max(38rem,calc(100dvh-4.5rem))] lg:py-12 lg:pl-[max(2rem,calc((100%_-_64rem)/2_+_2rem))] lg:pr-[max(2rem,calc((100%_-_72rem)/2_+_2rem))]";
-// 질문(q) 타이포 — md 2열 진입 시 열 폭에 맞춰 한 단계 낮추고 xl에서 원 크기 복귀
-const SLIDE_Q =
-  "mt-2.5 text-2xl font-semibold leading-[1.35] tracking-[-0.015em] text-balance sm:text-3xl md:text-2xl lg:text-3xl xl:text-[2.5rem]";
-const SLIDE_VIZ =
-  "flex flex-wrap items-center justify-center gap-6 justify-self-center md:justify-self-end lg:flex-nowrap";
-
-// 슬라이드 2 배경 도구명 텍스처 — 장면 데이터 (카피 아님)
-// 위치가 % 기준이라 1열(md 미만)에서는 상단 4개가 본문 위를 지난다 — 실측 겹침 495~17433px²
-// → md 미만에서 숨긴다(`hidden md:block`). 하단 4개는 전 폭에서 겹침 0이라 그대로 둔다
-const WORDFIELD: Array<[string, string]> = [
-  ["chrome-devtools", "left-[4%] top-[12%] text-3xl -rotate-6 hidden md:block"],
-  ["sequential-thinking", "left-[62%] top-[8%] text-[1.375rem] rotate-[4deg] hidden md:block"],
-  ["ponytail", "left-[78%] top-[38%] text-[2rem] -rotate-3"],
-  ["claude-mem", "left-[8%] top-[74%] text-2xl rotate-[5deg]"],
-  ["make-prd", "left-[40%] top-[88%] text-[1.6875rem] -rotate-[4deg]"],
-  ["superpowers", "left-[68%] top-[78%] text-xl rotate-6"],
-  ["context7", "left-[30%] top-[4%] text-xl rotate-3 hidden md:block"],
-  ["GSAP", "left-[88%] top-[14%] text-[1.1875rem] -rotate-[5deg] hidden md:block"],
+// 사용 방법 4단계 (EL-LAND-006 · CPY-LAND-015~018) — 3번 "만들기"는 사용자 추가
+const HOW = [
+  { icon: Search, title: "01. 발견하기", body: "하고 싶은 작업을 주제로 찾고 다른 개발자들의 워크플로우를 살펴보세요." },
+  { icon: Copy, title: "02. 내 방식으로 복제하기", body: "도구와 단계를 복제한 뒤 자신의 프로젝트와 환경에 맞게 수정하세요." },
+  { icon: PenLine, title: "03. 내 워크플로우 만들기", body: "직접 쓰는 도구 조합과 순서를 단계별로 정리하세요." },
+  { icon: Share2, title: "04. 공유하기", body: "정리한 워크플로우를 링크나 이미지 카드로 다른 개발자에게 공유하세요." },
 ];
 
-// SCR-001 홈 v3 — 캐러셀 히어로 + 과정 레일 + 빌더 (쇼케이스는 11/22 제거)
+const EYEBROW = "text-xs font-semibold uppercase tracking-[0.14em] text-primary";
+
+// SCR-009 랜딩 — 탐색 중심 진입. 전부 서버 렌더, 클라이언트는 초안 배너뿐
 export default async function Home({ searchParams }: { searchParams: Promise<{ edit?: string }> }) {
   const { edit } = await searchParams;
   // 구 수정 링크 `/?edit=` → 빌더 분리 후 주소 (PRD-04 v3, 2.0)
   if (edit) redirect(`/create?edit=${encodeURIComponent(edit)}`);
 
+  // 최신 6장 — 실패·0건이면 섹션 생략, 랜딩은 깨지지 않는다 (REQ-LAND-003 AC-3)
+  const supabase = await createClient();
+  const { data } = await supabase
+    .from("workflows")
+    .select(LIST_COLUMNS)
+    .eq("is_public", true)
+    .eq("hidden", false)
+    .order("created_at", { ascending: false })
+    .limit(6);
+  const latest = data ?? [];
+
   return (
     <main className="flex-1">
-      {/* 사이트 식별 구조화 데이터 — 사이트 내 검색이 없어 SearchAction은 넣지 않는다 */}
+      {/* 사이트 식별 + 사이트 내 검색(SearchAction) — 2.0부터 /workflows?q= 검색이 있다 */}
       <JsonLd
         data={{
           "@context": "https://schema.org",
@@ -72,11 +65,16 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ e
           name: SITE_NAME,
           alternateName: "스택드", // 한글 브랜드 검색어 매칭 (SEO 9/8)
           url: SITE_URL,
-          description: SITE_DESCRIPTION,
+          description: DESCRIPTION,
           inLanguage: "ko-KR",
+          potentialAction: {
+            "@type": "SearchAction",
+            target: { "@type": "EntryPoint", urlTemplate: `${SITE_URL}/workflows?q={search_term_string}` },
+            "query-input": "required name=search_term_string",
+          },
         }}
       />
-      {/* 브랜드 주체 신호 — "stackd.kr = 이 브랜드" 엔티티 묶기. 로고는 PNG 규칙(180×180) */}
+      {/* 브랜드 주체 신호 — 로고는 PNG 규칙(180×180) */}
       <JsonLd
         data={{
           "@context": "https://schema.org",
@@ -91,224 +89,120 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ e
       {/* 초안 보유자는 빌더(`/create`)로 이어서 쓰기 (SCR-009 §11 #4) */}
       <DraftBanner href="/create" />
 
-      {/* 풀뷰포트 캐러셀 (EL-HOME-016) — 슬라이드는 서버 렌더, 컨트롤만 클라이언트 */}
-      <section aria-label="Stackd 소개">
-        <HomeCarousel>
-          {/* 슬라이드 1 = 히어로: h1·부제·CTA + 카톡 공유 장면 DOM 재현 (EL-HOME-002·017·022) */}
-          <article className={`${SLIDE} bg-(--chat-bg)`}>
-            {/* 오케스트레이션 래퍼 (ANIMATION.md #1) — 콘텐츠는 서버 렌더 유지 */}
-            <HeroIntro className={SLIDE_INNER}>
-              <div data-hero="text">
-                <h1 className="max-w-[20ch] text-[2.75rem] sm:text-[3.5rem] md:text-4xl lg:text-6xl xl:text-[4rem]">
-                  도구는 아는데, 어떻게 쓰는지는 모른다.
-                </h1>
-                <p className="mt-6 max-w-[62ch] text-lg text-(--chat-fg) sm:text-xl md:text-lg lg:text-xl">
-                  실제 개발자들이 어떤 상황에서, 어떤 순서로 agent를 쓰는지 — 워크플로우를 카드 한 장으로
-                  공유하세요.
-                </p>
-                <div className="mt-8">
-                  {/* 히어로 CTA — DESIGN.md §접근성 "본문 주요 CTA 44px" 미달이었다(36px). 48px로 올림 */}
-                  {/* asChild로 감싸야 cn()의 tailwind-merge가 base의 text-sm을 걷어낸다 */}
-                  <Button asChild size="lg" className="h-12 px-6 text-base">
-                    <a href="/create">바로 만들기</a>
-                  </Button>
-                </div>
-              </div>
-              <div
-                data-hero="chat"
-                role="img"
-                aria-label="메신저에서 워크플로우 카드가 링크로 공유된 장면"
-                className="grid w-full max-w-lg gap-3.5 justify-self-center md:justify-self-end"
-              >
-                <p className="m-0 w-fit max-w-[85%] rounded-[1.25rem] rounded-tl-sm bg-white px-4 py-3 text-base leading-normal sm:px-4.5 sm:py-3.5 sm:text-lg">
-                  그 셋업 어떻게 했어요? 저도 따라해보고 싶어요
-                </p>
-                <p className="m-0 w-fit max-w-[85%] justify-self-end rounded-[1.25rem] rounded-tr-sm bg-(--chat-me) px-4 py-3 text-base leading-normal text-[#111419] sm:px-4.5 sm:py-3.5 sm:text-lg">
-                  제 워크플로우 카드로 정리해뒀어요
-                </p>
-                <div className="w-full max-w-92 justify-self-end overflow-hidden rounded-xl bg-white">
-                  <div className="flex justify-center bg-muted pb-3 pt-4.5">
-                    <ScaledCard className="[--s:0.26] sm:[--s:0.38]" cardClassName="shadow-none" />
-                  </div>
-                  <div className="border-t border-border px-4 py-3.5">
-                    <p className="text-base font-semibold leading-[1.4] sm:text-[1.0625rem]">{HERO_CARD.title}</p>
-                    <p className="mt-1 font-mono text-[0.8125rem] leading-none text-muted-foreground">stackd.kr</p>
-                  </div>
-                </div>
-              </div>
-            </HeroIntro>
-          </article>
-
-          {/* 슬라이드 2: 무질서 → 순서 (EL-HOME-018) */}
-          <article className={`${SLIDE} bg-background`}>
-            <div aria-hidden className="absolute inset-0">
-              {WORDFIELD.map(([name, pos]) => (
-                <span key={name} className={`absolute whitespace-nowrap font-mono text-muted-foreground opacity-[0.07] md:opacity-[0.14] ${pos}`}>
-                  {name}
-                </span>
-              ))}
-            </div>
-            <div className={SLIDE_INNER}>
-              <div>
-                <p className="text-base font-medium text-muted-foreground">이런 적 있죠</p>
-                <p className={SLIDE_Q}>
-                  새 도구는 매주 쏟아지는데, 뭘 어떤 순서로 조합할지는 아무도 안 알려줘요
-                </p>
-                <div className="mt-8 grid gap-2 border-t border-border pt-7">
-                  <span className="text-base font-medium text-muted-foreground">Stackd의 답</span>
-                  <p className="text-lg font-medium xl:text-xl">도구 목록이 아니라, 상황과 순서가 담긴 워크플로우를 통째로 공유해요</p>
-                </div>
-              </div>
-              <div
-                role="img"
-                aria-label="흩어진 도구 이름들이 순서 있는 단계로 정리되는 모습"
-                className={SLIDE_VIZ}
-              >
-                <div className="flex max-w-64 flex-wrap gap-3">
-                  {["chrome-devtools", "superpowers", "make-prd", "ponytail", "claude-mem"].map((name, i) => (
-                    <span
-                      key={name}
-                      className={`rounded-full border border-border bg-card px-4 py-2 font-mono text-base leading-none text-muted-foreground ${i === 1 ? "-rotate-[4deg]" : i === 3 ? "rotate-3" : ""}`}
-                    >
-                      {name}
-                    </span>
-                  ))}
-                </div>
-                <span aria-hidden className="basis-full rotate-90 text-center text-4xl text-muted-foreground lg:basis-auto lg:rotate-0 lg:text-left shrink-0">→</span>
-                <ol className="relative grid gap-4.5 rounded-xl border border-border bg-card px-7 py-6">
-                  <span aria-hidden className="absolute bottom-8 left-[calc(1.75rem+14px)] top-8 w-px bg-border" />
-                  {["superpowers", "make-prd", "ponytail"].map((name, i) => (
-                    <li key={name} className="relative flex items-center gap-3.5">
-                      <span className="z-[1] flex size-7 items-center justify-center rounded-full bg-foreground font-mono text-[11px] font-medium text-background">
-                        {`0${i + 1}`}
-                      </span>
-                      <span className="font-mono text-[1.0625rem] font-medium leading-none">{name}</span>
-                    </li>
-                  ))}
-                </ol>
-              </div>
-            </div>
-          </article>
-
-          {/* 슬라이드 3: 길다 vs 한 장 (EL-HOME-019) */}
-          <article className={`${SLIDE} bg-muted`}>
-            <div className={SLIDE_INNER}>
-              <div>
-                <p className="text-base font-medium text-muted-foreground">이런 적 있죠</p>
-                <p className={SLIDE_Q}>
-                  블로그 글은 너무 길고, 트윗은 너무 얕아요
-                </p>
-                <div className="mt-8 grid gap-2 border-t border-foreground/10 pt-7">
-                  <span className="text-base font-medium text-muted-foreground">Stackd의 답</span>
-                  <p className="text-lg font-medium xl:text-xl">카드 한 장이 요약, 클릭하면 단계별 설명이 상세 페이지로 열려요</p>
-                </div>
-              </div>
-              <div
-                role="img"
-                aria-label="긴 문서가 카드 한 장으로 요약되는 모습"
-                className={SLIDE_VIZ}
-              >
-                <div aria-hidden className="grid w-54 gap-2.5 rounded-lg border border-border bg-card p-6">
-                  {Array.from({ length: 9 }, (_, i) => (
-                    <span key={i} className={`block h-2 rounded-sm bg-muted ${i % 2 === 0 ? "w-[92%]" : "w-[70%]"}`} />
-                  ))}
-                </div>
-                <span aria-hidden className="basis-full rotate-90 text-center text-4xl text-muted-foreground lg:basis-auto lg:rotate-0 lg:text-left shrink-0">→</span>
-                <ScaledCard className="[--s:0.36] sm:[--s:0.52] md:[--s:0.42] lg:[--s:0.52]" cardClassName="shadow-[0_12px_28px_-12px_rgba(17,20,25,0.18)]" />
-              </div>
-            </div>
-          </article>
-        </HomeCarousel>
-      </section>
-
-      {/* 과정 레일 (EL-HOME-021) — 시그니처 단계 레일 조형 재사용 */}
-      {/* overflow-hidden — 슬라이드 x 이동이 모바일 패딩을 넘어 가로 스크롤을 만들지 않게 */}
-      <section aria-label="만드는 과정" className="overflow-hidden border-t border-border py-16 sm:py-24">
-        {/* 스크롤 리빌 (ANIMATION.md #6) — 단계는 각자 진입 시 등장 */}
-        <ScrollReveal className="container-page">
-          <div data-reveal="left">
-            <h2 className="text-2xl sm:text-3xl">적은 그대로, 카드 한 장이 됩니다</h2>
-            <p className="mt-3 max-w-[62ch] text-muted-foreground">
-              위의 예시 카드도 이 순서로 만들어졌어요. 저장 전까지 로그인은 필요 없어요.
+      {/* EL-LAND-002·003 히어로 */}
+      <section aria-labelledby="hero-title" className="overflow-hidden">
+        <div className="container-page grid items-center gap-12 py-14 sm:py-20 lg:grid-cols-[minmax(0,1fr)_auto] lg:gap-10">
+          <div>
+            <p className={`${EYEBROW} flex items-center gap-2`}>
+              <span aria-hidden className="size-1.5 rounded-full bg-primary" />
+              Discover better workflows
             </p>
+            <h1 id="hero-title" className="mt-5 text-[2.5rem] leading-[1.2] tracking-[-0.02em] sm:text-5xl lg:text-[3.5rem]">
+              AI 도구는 많은데,
+              <br />
+              <span className="text-primary">어떻게 조합해야</span>
+              <br />
+              할지 모르겠다면.
+            </h1>
+            <p className="mt-6 max-w-[46ch] text-lg leading-[1.75] text-muted-foreground">
+              다른 개발자들은 어떤 도구를, 어떤 순서로 사용할까요? 실제 AI 워크플로우를 발견하고 내 작업 방식으로 만들어 보세요.
+            </p>
+            <div className="mt-8 flex flex-wrap gap-3">
+              <Link href="/workflows" className={`${buttonVariants({ size: "lg" })} h-12 px-6 text-base`}>
+                워크플로우 탐색하기 <ArrowUpRight aria-hidden />
+              </Link>
+              <Link href="/create" className={`${buttonVariants({ size: "lg", variant: "outline" })} h-12 px-6 text-base`}>
+                내 워크플로우 공유하기
+              </Link>
+            </div>
+            <p className="mt-5 text-sm text-muted-foreground">도구 목록을 넘어, 실제 사용하는 순서와 이유까지.</p>
           </div>
-          <ol className="relative mt-12 grid gap-14">
-            <span aria-hidden className="absolute bottom-4 left-4 top-4 w-px bg-border" />
-            <li data-reveal="left" className="relative grid grid-cols-[2rem_minmax(0,1fr)] gap-4 sm:gap-6">
-              <span className="z-[1] flex size-8 items-center justify-center rounded-full bg-foreground font-mono text-xs font-medium text-background">01</span>
-              <div>
-                <h3 className="mt-1 text-lg sm:text-xl">상황과 단계를 적는다</h3>
-                <p className="mt-2 max-w-[62ch] text-muted-foreground">
-                  언제 쓰는 워크플로우인지 한 줄, 그리고 도구를 쓰는 순서대로 단계를 담아요. 도구는
-                  카탈로그에서 고르거나 직접 입력해요.
-                </p>
-                <div
-                  role="img"
-                  aria-label="빌더에 제목과 첫 단계가 입력된 모습"
-                  className="mt-5 grid max-w-xl gap-4 rounded-xl border border-border bg-card p-5"
-                >
-                  <div>
-                    <p className="text-xs font-medium text-muted-foreground">제목 — 이 워크플로우를 한 줄로</p>
-                    <p className="mt-1.5 rounded-lg border border-input px-3 py-2 text-sm leading-normal">{HERO_CARD.title}</p>
-                  </div>
-                  <div className="flex items-start gap-3 rounded-lg border border-border bg-background p-3">
-                    <span className="flex size-5.5 shrink-0 items-center justify-center rounded-full bg-foreground font-mono text-[9px] font-medium text-background">01</span>
-                    <div>
-                      <p className="font-mono text-[0.8125rem] font-medium leading-[1.2]">{HERO_CARD.steps[0].tool.name}</p>
-                      <p className="mt-1 text-xs text-muted-foreground">{HERO_CARD.steps[0].note}</p>
-                    </div>
-                  </div>
+
+          {/* 0번 카드 — 겹친 판 위에 살짝 기울여 "카드 묶음"으로 (시안 구성) */}
+          <div aria-label="예시 워크플로우 카드" role="group" className="relative mx-auto [--s:0.56] sm:[--s:0.66] lg:[--s:0.7]">
+            <div aria-hidden className="absolute inset-x-0 top-0 h-[calc(700px*var(--s))] -rotate-6 rounded-xl border border-border bg-muted" />
+            <div className="relative rotate-2 overflow-hidden rounded-xl shadow-[0_24px_48px_-24px_rgba(17,20,25,0.35)]">
+              <div className="h-[calc(700px*var(--s))] w-[calc(560px*var(--s))] overflow-hidden">
+                <div className="origin-top-left [transform:scale(var(--s))]">
+                  <WorkflowCard workflow={HERO_CARD} handle="kjjyyy01" className="shadow-none" />
                 </div>
               </div>
-            </li>
-            <li data-reveal="right" className="relative grid grid-cols-[2rem_minmax(0,1fr)] gap-4 sm:gap-6">
-              <span className="z-[1] flex size-8 items-center justify-center rounded-full bg-foreground font-mono text-xs font-medium text-background">02</span>
-              <div>
-                <h3 className="mt-1 text-lg sm:text-xl">카드로 미리 본다</h3>
-                <p className="mt-2 max-w-[62ch] text-muted-foreground">
-                  입력한 내용이 그대로 한 장의 카드가 돼요. 단계 레일과 스택 태그까지, 공유될 모습 그대로
-                  미리 봅니다.
-                </p>
-                <ScaledCard className="mt-5 [--s:0.5]" cardClassName="shadow-none" />
-              </div>
-            </li>
-            <li data-reveal="left" className="relative grid grid-cols-[2rem_minmax(0,1fr)] gap-4 sm:gap-6">
-              <span className="z-[1] flex size-8 items-center justify-center rounded-full bg-foreground font-mono text-xs font-medium text-background">03</span>
-              <div>
-                <h3 className="mt-1 text-lg sm:text-xl">링크·PNG로 공유한다</h3>
-                <p className="mt-2 max-w-[62ch] text-muted-foreground">
-                  링크를 복사하거나 PNG로 저장해서 어디든 공유해요. 링크가 붙는 곳마다 카드 미리보기가 함께
-                  실려요.
-                </p>
-                <div className="mt-5 grid max-w-xl gap-3">
-                  <div
-                    role="img"
-                    aria-label="링크 복사와 PNG 저장 버튼이 있는 공유 줄"
-                    className="flex items-center justify-between gap-4 overflow-hidden rounded-lg border border-border bg-card px-3.5 py-2.5"
-                  >
-                    <span className="min-w-0 flex-1 truncate font-mono text-[0.8125rem] text-muted-foreground">stackd.kr/card-detail/wf_3x9k2m</span>
-                    <span className="flex shrink-0 gap-2">
-                      <span className={buttonVariants({ variant: "outline", size: "sm" })}>링크 복사</span>
-                      <span className={buttonVariants({ variant: "outline", size: "sm" })}>PNG 저장</span>
-                    </span>
-                  </div>
-                  <div role="img" aria-label="링크 미리보기 카드" className="overflow-hidden rounded-xl border border-border bg-card">
-                    <div className="flex h-24 items-center justify-center bg-muted">
-                      <span className="font-mono text-xs font-medium uppercase tracking-[0.1em] text-muted-foreground">Workflow Card</span>
-                    </div>
-                    <div className="border-t border-border px-3.5 py-3">
-                      <p className="text-sm font-semibold leading-[1.4]">{HERO_CARD.title}</p>
-                      <p className="mt-1 font-mono text-xs leading-none text-muted-foreground">stackd.kr</p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </li>
-          </ol>
-        </ScrollReveal>
+            </div>
+            <Link
+              href={`/card-detail/${HERO_CARD_ID}`}
+              className="relative mt-6 inline-flex items-center gap-1 py-2 text-sm font-medium text-primary underline-offset-4 hover:underline"
+            >
+              <ArrowUpRight aria-hidden className="size-4" /> 내 방식으로 복제
+            </Link>
+          </div>
+        </div>
       </section>
 
-      <BackToTop />
+      {/* EL-LAND-004·008 주제·검색 */}
+      <section aria-labelledby="search-title" className="border-t border-border bg-card py-10 sm:py-12">
+        <div className="container-page grid gap-5">
+          <h2 id="search-title" className="text-xl sm:text-2xl">지금 어떤 작업을 하고 있나요?</h2>
+          <SearchForm />
+          <TopicChips />
+        </div>
+      </section>
+
+      {/* EL-LAND-005 최신 워크플로우 — 없으면 섹션 생략 */}
+      {latest.length > 0 && (
+        <section aria-labelledby="latest-title" className="border-t border-border py-14 sm:py-20">
+          <div className="container-page">
+            <div className="flex flex-wrap items-end justify-between gap-4">
+              <div>
+                <p className={EYEBROW}>Explore workflows</p>
+                <h2 id="latest-title" className="mt-3 text-2xl sm:text-3xl">다른 개발자들은 이렇게 사용해요.</h2>
+                <p className="mt-2 text-muted-foreground">실제 작업에 적용할 수 있는 도구 조합과 순서를 찾아보세요.</p>
+              </div>
+              <Link href="/workflows" className="inline-flex items-center gap-1 py-2 text-sm font-medium underline-offset-4 hover:underline">
+                모든 워크플로우 <ArrowUpRight aria-hidden className="size-4" />
+              </Link>
+            </div>
+            <ul className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              {latest.map((w, i) => (
+                <li key={w.id}>
+                  <WorkflowListCard w={w} index={i} headingAs="h3" />
+                </li>
+              ))}
+            </ul>
+          </div>
+        </section>
+      )}
+
+      {/* EL-LAND-006 사용 방법 4단계 */}
+      <section aria-labelledby="how-title" className="border-t border-border py-14 sm:py-20">
+        <div className="container-page">
+          <p className={EYEBROW}>How it works</p>
+          <h2 id="how-title" className="mt-3 text-2xl sm:text-3xl">발견하고, 내 방식으로 바꾸고, 만들고, 공유하세요.</h2>
+          <ol className="mt-10 grid gap-8 sm:grid-cols-2 lg:grid-cols-4 lg:gap-6">
+            {HOW.map(({ icon: Icon, title, body }) => (
+              <li key={title} className="flex gap-4 lg:flex-col">
+                <span aria-hidden className="flex size-12 shrink-0 items-center justify-center rounded-xl border border-border bg-card text-primary">
+                  <Icon className="size-5" />
+                </span>
+                <div>
+                  <h3 className="text-base font-semibold">{title}</h3>
+                  <p className="mt-1.5 text-sm leading-[1.75] text-muted-foreground">{body}</p>
+                </div>
+              </li>
+            ))}
+          </ol>
+        </div>
+      </section>
+
+      {/* EL-LAND-007 마지막 CTA */}
+      <section aria-labelledby="cta-title" className="border-t border-border bg-card py-16 sm:py-20">
+        <div className="container-page grid justify-items-center gap-3 text-center">
+          <h2 id="cta-title" className="text-2xl sm:text-3xl">당신의 작업 방식도 누군가에게 도움이 됩니다.</h2>
+          <p className="text-muted-foreground">자신만의 AI 워크플로우를 카드 한 장으로 정리해 보세요.</p>
+          <Link href="/create" className={`${buttonVariants({ size: "lg" })} mt-5 h-12 px-6 text-base`}>
+            내 워크플로우 만들기 <ArrowUpRight aria-hidden />
+          </Link>
+        </div>
+      </section>
     </main>
   );
 }
