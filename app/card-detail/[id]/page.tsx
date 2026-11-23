@@ -98,7 +98,7 @@ export default async function CardDetailPage({ params }: Params) {
         <p className="mt-6 max-w-[62ch] text-sm leading-[1.75] text-muted-foreground">
           신고 검토로 숨겨진 워크플로우예요 — 사유: {wf.hidden_reason}
         </p>
-        <Link href="/?utm_source=card&utm_medium=share" className={`${buttonVariants({ size: "lg" })} mt-8 h-11 px-6`}>
+        <Link href="/create?utm_source=card&utm_medium=share" className={`${buttonVariants({ size: "lg" })} mt-8 h-11 px-6`}>
           나도 내 워크플로우 카드 만들기
         </Link>
       </main>
@@ -201,7 +201,7 @@ export default async function CardDetailPage({ params }: Params) {
 
           {/* EL-WF-007 CTA — 소유자는 UTM 없이(자기 유입은 확산이 아니다, PRD-15 §UTM) */}
           <Link
-            href={isOwner ? "/" : "/?utm_source=card&utm_medium=share"}
+            href={isOwner ? "/create" : "/create?utm_source=card&utm_medium=share"}
             className={`${buttonVariants({ size: "lg" })} mt-8 h-11 w-full px-6 sm:w-auto`}
           >
             {isOwner ? "카드 하나 더 만들기" : "나도 내 워크플로우 카드 만들기"}

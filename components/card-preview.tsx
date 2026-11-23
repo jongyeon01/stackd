@@ -38,11 +38,11 @@ export default function CardPreview({ handle, loggedIn }: Props) {
   const [savedId, setSavedId] = useState<string | null>(null);
   const fired = useRef(false);
 
-  // 초안 없음·손상·단계 2개 미만이면 홈으로 (REQ-CARD-001 AC-2)
+  // 초안 없음·손상·단계 2개 미만이면 빌더로 (REQ-CARD-001 AC-2 — 2.0 빌더 `/create`)
   useEffect(() => {
     const d = loadDraft();
     if (!d || d.steps.length < LIMITS.steps.min) {
-      router.replace("/");
+      router.replace("/create");
       return;
     }
     // 홈 복귀 시 배너 없이 즉시 복원 (SCR-001 §6) — 링크 클릭과 브라우저 뒤로가기를 한 번에 덮는다
@@ -204,7 +204,7 @@ export default function CardPreview({ handle, loggedIn }: Props) {
         {/* EL-CARD-014 복귀 링크 — 초안 유지 + 수정 중이면 URL에도 남긴다.
             빌더의 문구·스크롤은 URL `?edit=` 기준이라 떼면 생성 모드로 보인다 (§6 뒤로가기) */}
         <Link
-          href={draft.editId ? `/?edit=${draft.editId}` : "/"}
+          href={draft.editId ? `/create?edit=${draft.editId}` : "/create"}
           className="mt-1 inline-block py-2.5 text-sm leading-[1.75] text-muted-foreground underline underline-offset-4"
         >
           돌아가서 수정하기

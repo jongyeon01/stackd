@@ -1,17 +1,22 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { clearDraft, isDraftEmpty, isResuming, loadDraft } from "@/lib/draft";
+import { clearDraft, isDraftEmpty, isResuming, loadDraft, markResume } from "@/lib/draft";
 
 // 초안 이어쓰기/새로 시작 신호 — 빌더가 수신 (형제 컴포넌트라 이벤트로 연결)
 export const DRAFT_EVENT = "stackd:draft";
 
-type Props = { editId?: string }; // 수정 모드로 로드된 카드 id (SCR-001 §11 #3)
+type Props = {
+  editId?: string; // 수정 모드로 로드된 카드 id (SCR-001 §11 #3)
+  href?: string; // 빌더가 없는 페이지(랜딩) — 이어서 쓰기 = 빌더로 이동 후 즉시 복원
+};
 
 // 초안 복원 배너 (EL-HOME-004) — 헤더 아래 전역, 빌더가 하단이라 여기서 알린다
-export default function DraftBanner({ editId }: Props) {
+export default function DraftBanner({ editId, href }: Props) {
   const [show, setShow] = useState(false);
+  const router = useRouter();
 
   // hydration 후에만 — 서버 HTML은 배너 없음 (PRD §13)
   useEffect(() => {
@@ -27,6 +32,11 @@ export default function DraftBanner({ editId }: Props) {
 
   const act = (action: "restore" | "discard") => {
     if (action === "discard") clearDraft();
+    if (action === "restore" && href) {
+      markResume(); // 빌더가 배너 없이 바로 복원한다 (BR-019 · `/card` 복귀와 같은 경로)
+      router.push(href);
+      return;
+    }
     window.dispatchEvent(new CustomEvent(DRAFT_EVENT, { detail: action }));
     setShow(false);
     if (action === "restore") document.getElementById("builder")?.scrollIntoView();

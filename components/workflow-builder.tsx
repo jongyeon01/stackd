@@ -14,9 +14,17 @@ import { DRAFT_EVENT } from "@/components/draft-banner";
 import { track } from "@/lib/analytics";
 import { isCatalogTool } from "@/lib/catalog";
 import { EMPTY_DRAFT, clearDraft, isDraftEmpty, isResuming, loadDraft, saveDraft, type Draft } from "@/lib/draft";
-import { CATEGORIES, CUSTOMIZABLE_CATEGORIES, DEV_STACK_CATEGORIES, LIMITS, charCount, toolUrl, validateWorkflow } from "@/lib/limits";
+import { CATEGORIES, CUSTOMIZABLE_CATEGORIES, DETAIL_FIELDS, DEV_STACK_CATEGORIES, LIMITS, TOPICS, TOPIC_LABELS, charCount, toolUrl, validateWorkflow } from "@/lib/limits";
 
 type Step = Draft["steps"][number];
+
+// 상세 템플릿 입력 라벨 (CPY-HOME-066~069) — rows 없으면 한 줄 입력
+const DETAIL_UI: { key: (typeof DETAIL_FIELDS)[number]; label: string; rows?: number }[] = [
+  { key: "expected_result", label: "예상 결과 — 이 워크플로우를 적용하면 무엇을 얻나요?", rows: 2 },
+  { key: "prerequisites", label: "준비물 — 필요한 계정·도구·프로젝트 환경", rows: 3 },
+  { key: "caveats", label: "주의사항 — 보안·호환성·API 비용·라이선스 등", rows: 3 },
+  { key: "tested_env", label: "직접 확인한 환경 — 예: macOS · Next.js 16 · Claude Code 2.x (상세에 '작성자 자기 신고'로 표시)" },
+];
 type Props = {
   initial?: Draft; // 수정 모드로 로드된 DB 값 (REQ-HOME-006) — 없으면 새로 쓰기
 };
@@ -95,6 +103,7 @@ export default function WorkflowBuilder({ initial }: Props) {
   const fieldOk: Record<string, boolean> = {
     title: charCount(d.title.trim()) >= LIMITS.title.min,
     situation_short: charCount(d.situation_short.trim()) >= LIMITS.situation_short.min,
+    topic: d.topic !== "",
   };
 
   // 상한 넘는 입력은 차단(값 미반영) + 해당 필드 카운터 옆 안내
@@ -168,6 +177,21 @@ export default function WorkflowBuilder({ initial }: Props) {
               onBlur={() => touch("situation_short")} placeholder="상황을 20자 안으로 짧게 적어주세요 (예: 웹 페이지 개발, 백엔드 디버깅)" aria-invalid={showErr("situation_short") || undefined} aria-describedby="situation_short-err" />
             <p id="situation_short-err" className="min-h-4 text-xs text-destructive">{showErr("situation_short") ? "상황을 20자 안으로 짧게 적어주세요 (예: 웹 페이지 개발, 백엔드 디버깅)" : null}</p>
           </div>
+          {/* 주제 (EL-HOME-027, BR-029) — 필수, 네이티브 라디오라 키보드·스크린리더 그대로 */}
+          <fieldset className="grid gap-2" aria-describedby="topic-err">
+            <legend className="mb-2 text-sm font-medium">주제</legend>
+            <div className="flex flex-wrap gap-2">
+              {TOPICS.map((t) => (
+                <label key={t} className="cursor-pointer">
+                  <input type="radio" name="topic" value={t} checked={d.topic === t} onChange={() => setD({ ...d, topic: t })} className="peer sr-only" />
+                  <span className="inline-flex h-9 items-center rounded-full border border-border px-4 text-sm peer-checked:border-foreground peer-checked:bg-foreground peer-checked:text-background peer-focus-visible:ring-3 peer-focus-visible:ring-ring/50">
+                    {TOPIC_LABELS[t]}
+                  </span>
+                </label>
+              ))}
+            </div>
+            <p id="topic-err" className="min-h-4 text-xs text-destructive">{showErr("topic") ? "어떤 작업인지 주제를 골라주세요" : null}</p>
+          </fieldset>
           <div className="grid gap-2">
             <div className="flex items-baseline justify-between gap-4">
               <Label htmlFor="situation" className="text-sm font-medium">상황 상세 (선택)</Label>
@@ -176,6 +200,26 @@ export default function WorkflowBuilder({ initial }: Props) {
             <Textarea id="situation" rows={3} value={d.situation} onChange={(e) => limited("situation", LIMITS.situation.max, (s) => setD({ ...d, situation: s }))(e.target.value)}
               placeholder="어떤 상황에서 쓰는 워크플로우인가요? 자세히 적어주면 상세 페이지에 실려요 (선택)" />
           </div>
+
+          {/* 상세 템플릿 (EL-HOME-028~031, BR-028) — 선택이라 접어 둔다. 값이 있으면 펼친 채로 */}
+          <details className="group rounded-lg border border-border px-4 py-3" open={DETAIL_FIELDS.some((k) => d[k]) || undefined}>
+            <summary className="cursor-pointer text-sm font-medium">자세히 적기 (선택) — 예상 결과·준비물·주의사항·확인 환경</summary>
+            <div className="mt-4 grid gap-5">
+              {DETAIL_UI.map(({ key, label, rows }) => (
+                <div key={key} className="grid gap-2">
+                  <div className="flex items-baseline justify-between gap-4">
+                    <Label htmlFor={key} className="text-sm font-medium">{label}</Label>
+                    <Counter n={charCount(d[key])} max={LIMITS[key].max} over={over === key} />
+                  </div>
+                  {rows ? (
+                    <Textarea id={key} rows={rows} value={d[key]} onChange={(e) => limited(key, LIMITS[key].max, (s) => setD({ ...d, [key]: s }))(e.target.value)} />
+                  ) : (
+                    <Input id={key} value={d[key]} onChange={(e) => limited(key, LIMITS[key].max, (s) => setD({ ...d, [key]: s }))(e.target.value)} />
+                  )}
+                </div>
+              ))}
+            </div>
+          </details>
         </fieldset>
 
         {/* 단계 (EL-HOME-008~011) */}
@@ -234,6 +278,20 @@ export default function WorkflowBuilder({ initial }: Props) {
                         <span style={{ wordBreak: "keep-all" }}>공개된 도구가 아니에요 — 카드에 표시할게요</span>
                       </Label>
                     )}
+                    {/* 단계 프롬프트 (EL-HOME-032, BR-028) — 복사용 원문이라 mono, 시크릿 금지 안내 상시 */}
+                    <details className="mt-1" open={Boolean(s.prompt) || undefined}>
+                      <summary className="cursor-pointer text-sm text-muted-foreground">프롬프트·설정 (선택)</summary>
+                      <div className="mt-2 grid gap-1">
+                        <Label htmlFor={`prompt-${i}`} className="sr-only">단계 {i + 1} 프롬프트·설정</Label>
+                        <Textarea id={`prompt-${i}`} rows={4} className="font-mono text-sm" value={s.prompt ?? ""}
+                          onChange={(e) => limited(`prompt-${i}`, LIMITS.step_prompt.max, (v) => patchStep(i, { prompt: v }))(e.target.value)}
+                          placeholder="이 단계에서 쓴 프롬프트, 명령어, 설정 예시를 그대로 붙여 넣으세요" aria-describedby={`prompt-${i}-note`} />
+                        <div className="flex items-start justify-between gap-4">
+                          <p id={`prompt-${i}-note`} className="text-xs text-muted-foreground">API 키·비밀번호·개인정보는 넣지 마세요 — 공개되면 누구나 복사할 수 있어요</p>
+                          <Counter n={charCount(s.prompt ?? "")} max={LIMITS.step_prompt.max} over={over === `prompt-${i}`} />
+                        </div>
+                      </div>
+                    </details>
                     {incomplete && <p className="text-xs text-destructive">각 단계에 한 줄 메모와 설명을 채워주세요</p>}
                   </Card>
                 </li>
@@ -295,7 +353,7 @@ export default function WorkflowBuilder({ initial }: Props) {
               <Button type="button" size="lg" className="h-11 px-6" aria-disabled onClick={() => setCtaTried(true)}>{ctaLabel}</Button>
             )}
             {!gateOk && (
-              <p className="text-sm text-muted-foreground">제목·상황을 적고, 단계를 2개 이상(각각 한 줄 메모와 설명 포함) 담으면 카드를 만들 수 있어요</p>
+              <p className="text-sm text-muted-foreground">제목·상황·주제를 정하고, 단계를 2개 이상(각각 한 줄 메모와 설명 포함) 담으면 카드를 만들 수 있어요</p>
             )}
           </div>
         </div>

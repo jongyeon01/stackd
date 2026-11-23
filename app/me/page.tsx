@@ -61,7 +61,7 @@ export default async function MePage() {
         /* EL-ME-009 Empty (CPY-ME-002 + CPY-HOME-006) */
         <div className="mt-16 grid justify-items-center gap-5 text-center">
           <p className="text-muted-foreground">아직 만든 카드가 없어요 — 첫 워크플로우를 만들어보세요</p>
-          <Link href="/" className={buttonVariants({ size: "lg" })}>
+          <Link href="/create" className={buttonVariants({ size: "lg" })}>
             카드 만들기
           </Link>
         </div>

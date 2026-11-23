@@ -120,7 +120,7 @@ export default function CardActions({ id, isOwner, isPublic, hidden }: Props) {
         <div className="mt-6 border-t border-border pt-6">
           <div className="flex flex-wrap items-center gap-3">
             <Button asChild variant="outline" className="h-11 px-6">
-              <Link href={`/?edit=${id}`}>수정</Link>
+              <Link href={`/create?edit=${id}`}>수정</Link>
             </Button>
             <Button
               variant="outline"

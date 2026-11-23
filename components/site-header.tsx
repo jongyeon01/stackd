@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { NAV } from "@/lib/site";
 import Image from "next/image";
 import markHeader from "@/app/mark-header.png";
 
@@ -54,12 +55,12 @@ export default async function SiteHeader() {
 
         {/* 데스크톱 내비 — lg 이상. 공개 링크는 서버 HTML, 계정 항목은 UserMenu 안 */}
         <nav aria-label="주요" className="hidden items-center gap-1 text-sm lg:flex">
-          <Link
-            href="/workflows"
-            className="rounded-md px-2 py-1.5 text-muted-foreground transition-colors hover:text-foreground focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none"
-          >
-            라이브러리
-          </Link>
+          {/* 2.0 헤더 = 탐색 / 워크플로우 만들기 / 내 보관함(로그인) (PRD-04 v3) */}
+          {NAV.filter((n) => !n.auth || handle).map((n) => (
+            <Link key={n.href} href={n.href} className="rounded-md px-2 py-1.5 text-muted-foreground transition-colors hover:text-foreground focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none">
+              {n.label}
+            </Link>
+          ))}
 
           {handle ? (
             /* 계정 항목은 @핸들 아래로 접는다 (2026-08-28) — 내비에 개인 메뉴가 4개 나열되던 것을 1개로 */

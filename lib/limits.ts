@@ -25,6 +25,10 @@ export const LIMITS = {
 // 주제 enum 6종 (BR-029) — 순서 = 칩 표시 순서 (CPY-COMMON-011)
 export const TOPICS = ["build", "review", "test", "debug", "deploy", "automation"] as const;
 export type Topic = (typeof TOPICS)[number];
+// 주제 라벨 (CPY-COMMON-011) — 빌더·칩·목록 카드 공용
+export const TOPIC_LABELS: Record<Topic, string> = {
+  build: "웹 개발", review: "코드 리뷰", test: "테스트", debug: "디버깅", deploy: "배포", automation: "업무 자동화",
+};
 
 // 상세 템플릿 선택 필드 (BR-028) — 검증·초안·복제가 같은 목록을 돈다
 export const DETAIL_FIELDS = ["expected_result", "prerequisites", "caveats", "tested_env"] as const;

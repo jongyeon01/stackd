@@ -89,7 +89,7 @@ export default async function WorkflowsPage({ searchParams }: { searchParams: Pr
           <p className="text-muted-foreground">
             아직 공개된 워크플로우가 없어요 — 첫 카드를 만들어보세요
           </p>
-          <Link href="/" className={buttonVariants({ size: "lg" })}>
+          <Link href="/create" className={buttonVariants({ size: "lg" })}>
             카드 만들기
           </Link>
         </div>

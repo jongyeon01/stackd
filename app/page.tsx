@@ -6,12 +6,10 @@ import HomeCarousel from "@/components/home-carousel";
 import JsonLd from "@/components/json-ld";
 import ScrollReveal from "@/components/scroll-reveal";
 import { Button, buttonVariants } from "@/components/ui/button";
-import WorkflowBuilder from "@/components/workflow-builder";
 import WorkflowCard from "@/components/workflow-card";
-import { EMPTY_DRAFT, type Draft } from "@/lib/draft";
 import { HERO_CARD } from "@/lib/hero-card";
 import { BASE_OG, SITE_DESCRIPTION, SITE_NAME, SITE_URL } from "@/lib/site";
-import { createClient } from "@/lib/supabase/server";
+import { redirect } from "next/navigation";
 
 // SCR-001 홈 메타 — 제목·설명은 PRD-04 표 그대로. OG는 app/opengraph-image.tsx 상속
 export const metadata: Metadata = {
@@ -58,29 +56,11 @@ const WORDFIELD: Array<[string, string]> = [
   ["GSAP", "left-[88%] top-[14%] text-[1.1875rem] -rotate-[5deg] hidden md:block"],
 ];
 
-// 빌더에 실을 필드만 — id·user_id·작성자 스냅샷은 저장 시 서버가 다시 채운다 (BR-025)
-const EDIT_COLUMNS = "title, situation_short, situation, steps, dev_stack, role, accent, is_public";
-
 // SCR-001 홈 v3 — 캐러셀 히어로 + 과정 레일 + 빌더 (쇼케이스는 11/22 제거)
 export default async function Home({ searchParams }: { searchParams: Promise<{ edit?: string }> }) {
   const { edit } = await searchParams;
-  // 로그인 사용자의 소속 기본값 — 없거나 실패하면 빈 값 (REQ-HOME-004 AC-3)
-  const supabase = await createClient();
-  const { data } = await supabase.auth.getClaims();
-  const userId = data?.claims.sub;
-
-  // 수정 모드 (REQ-HOME-006) — RLS "public read"는 타인의 공개 카드도 통과시키므로
-  // 소유자 게이트는 user_id 명시 필터다. 0행·에러·비로그인은 전부 빈 빌더, 안내 없음 (AC-2·AC-3)
-  let initial: Draft | undefined;
-  if (edit && userId) {
-    const { data: row } = await supabase
-      .from("workflows")
-      .select(EDIT_COLUMNS)
-      .eq("id", edit)
-      .eq("user_id", userId)
-      .maybeSingle();
-    if (row) initial = { ...EMPTY_DRAFT, ...row, editId: edit };
-  }
+  // 구 수정 링크 `/?edit=` → 빌더 분리 후 주소 (PRD-04 v3, 2.0)
+  if (edit) redirect(`/create?edit=${encodeURIComponent(edit)}`);
 
   return (
     <main className="flex-1">
@@ -108,8 +88,8 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ e
           sameAs: ["https://github.com/kjjyyy01/stackd", "https://www.threads.com/@kjjyyy_"],
         }}
       />
-      {/* 수정 모드에서는 같은 카드의 초안일 때만 배너 (SCR-001 §11 #3) */}
-      <DraftBanner editId={initial?.editId} />
+      {/* 초안 보유자는 빌더(`/create`)로 이어서 쓰기 (SCR-009 §11 #4) */}
+      <DraftBanner href="/create" />
 
       {/* 풀뷰포트 캐러셀 (EL-HOME-016) — 슬라이드는 서버 렌더, 컨트롤만 클라이언트 */}
       <section aria-label="Stackd 소개">
@@ -130,7 +110,7 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ e
                   {/* 히어로 CTA — DESIGN.md §접근성 "본문 주요 CTA 44px" 미달이었다(36px). 48px로 올림 */}
                   {/* asChild로 감싸야 cn()의 tailwind-merge가 base의 text-sm을 걷어낸다 */}
                   <Button asChild size="lg" className="h-12 px-6 text-base">
-                    <a href="#builder">바로 만들기</a>
+                    <a href="/create">바로 만들기</a>
                   </Button>
                 </div>
               </div>
@@ -326,18 +306,6 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ e
             </li>
           </ol>
         </ScrollReveal>
-      </section>
-
-      {/* 빌더 (EL-HOME-024 + 005~014) — 헤딩은 서버 렌더, 폼은 클라이언트 */}
-      <section id="builder" className="scroll-mt-16 md:scroll-mt-18 border-t border-border py-16 sm:py-24">
-        <div className="container-page">
-          {/* 수정 모드는 헤딩부터 바꾼다 — 같은 화면이라 맥락 표시가 없으면 새로 쓰는 것으로 읽힌다 (CPY-HOME-058) */}
-          <h2 className="text-2xl sm:text-3xl">{initial ? "워크플로우 수정하기" : "내 워크플로우 적기"}</h2>
-          <p className="mt-3 max-w-[62ch] text-muted-foreground">
-            카드 한 장까지 2분이면 충분해요. 저장할 때만 GitHub 로그인이 필요해요.
-          </p>
-        </div>
-        <WorkflowBuilder initial={initial} />
       </section>
 
       <BackToTop />
