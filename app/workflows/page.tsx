@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { buttonVariants } from "@/components/ui/button";
+import CardTransition from "@/components/card-transition";
 import GridStagger from "@/components/grid-stagger";
 import JsonLd from "@/components/json-ld";
 import WorkflowListCard from "@/components/workflow-list-card";
@@ -137,7 +138,10 @@ export default async function WorkflowsPage({ searchParams }: { searchParams: Pr
             {items.map((w, i) => (
               <li key={w.id}>
                 {/* EL-LIB-003 목록 카드 (2.0) — 항목 전체가 링크 1개, 순번은 페이지 오프셋 반영 */}
-                <WorkflowListCard w={w} index={from + i} />
+                {/* 상세로 morph (ANIMATION.md #3) */}
+                <CardTransition id={w.id}>
+                  <WorkflowListCard w={w} index={from + i} />
+                </CardTransition>
               </li>
             ))}
           </GridStagger>
