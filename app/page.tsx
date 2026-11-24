@@ -94,9 +94,9 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ e
             <h1 id="hero-title" className="text-[2.5rem] leading-[1.2] tracking-[-0.02em] sm:text-5xl lg:text-[3.5rem]">
               AI 도구는 많은데,
               <br />
-              <span className="text-primary">어떻게 조합해야</span>
+              <span className="text-primary">어떻게 조합하고</span>
               <br />
-              할지 모르겠다면.
+              활용해야 할지 모르겠다면.
             </h1>
             <p className="mt-6 max-w-[46ch] text-lg leading-[1.75] text-muted-foreground">
               다른 개발자들은 어떤 도구를, 어떤 순서로 사용할까요? 실제 AI 워크플로우를 발견하고 내 작업 방식으로 만들어 보세요.
