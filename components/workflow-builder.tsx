@@ -300,7 +300,7 @@ export default function WorkflowBuilder({ initial }: Props) {
             <Label htmlFor="prompt" className="text-sm font-medium">추천 프롬프트 (선택) — 이 워크플로우를 한 번에 실행하는 지시</Label>
             <Counter n={charCount(d.prompt)} max={LIMITS.prompt.max} over={over === "prompt"} />
           </div>
-          <Textarea id="prompt" rows={5} className="font-mono text-sm" value={d.prompt}
+          <Textarea id="prompt" rows={5} value={d.prompt}
             onChange={(e) => limited("prompt", LIMITS.prompt.max, (s) => setD({ ...d, prompt: s }))(e.target.value)}
             placeholder={"예: 이 버그를 고쳐줘. 1) 재현 조건을 문장으로 적고 2) 호출부를 전부 찾은 뒤 3) 원인 한 곳만 고쳐"}
             aria-describedby="prompt-note" />

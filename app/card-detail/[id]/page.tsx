@@ -289,7 +289,7 @@ export default async function CardDetailPage({ params }: Params) {
         <section className="mt-12">
           <h2 className="text-lg font-semibold tracking-[-0.015em]">추천 프롬프트</h2>
           <div className="mt-3 max-w-[62ch] rounded-lg border border-border bg-muted/50">
-            <pre id="wf-prompt" className="overflow-x-auto whitespace-pre-wrap px-4 py-3 font-mono text-[0.8125rem] leading-[1.6]">{wf.prompt}</pre>
+            <pre id="wf-prompt" className="overflow-x-auto whitespace-pre-wrap px-4 py-3 font-sans text-sm leading-[1.75]">{wf.prompt}</pre>
             <div className="flex justify-end border-t border-border px-2 py-1.5">
               <PromptCopy id={wf.id} text={wf.prompt} />
             </div>
