@@ -231,15 +231,21 @@ test("상세 템플릿 필드 상한 초과 → ERR-BLDR-010, 비면 빈 문자�
   assert.equal(r.value.topic, "review");
 });
 
-test("단계 프롬프트 2001자 → ERR-BLDR-010, 빈 값은 키 제거, 원문 줄바꿈 유지 (BR-028)", () => {
-  const steps = (prompt: unknown) => v2().steps.map((s, i) => (i === 0 ? { ...s, prompt } : s));
-  assert.deepEqual(validateWorkflow({ ...v2(), steps: steps("a".repeat(2001)) }), { ok: false, code: "ERR-BLDR-010", field: "steps.0.prompt" });
-  const empty = validateWorkflow({ ...v2(), steps: steps("  ") });
-  assert.ok(empty.ok);
-  assert.equal("prompt" in empty.value.steps[0], false);
-  const kept = validateWorkflow({ ...v2(), steps: steps("line1\n  line2") });
+test("추천 프롬프트는 워크플로우당 1개, 2001자 → ERR-BLDR-010, 원문 줄바꿈 유지 (BR-028)", () => {
+  assert.deepEqual(validateWorkflow({ ...v2(), prompt: "a".repeat(2001) }), { ok: false, code: "ERR-BLDR-010", field: "prompt" });
+  const kept = validateWorkflow({ ...v2(), prompt: "1) 재현\n  2) 수정" });
   assert.ok(kept.ok);
-  assert.equal(kept.value.steps[0].prompt, "line1\n  line2");
+  assert.equal(kept.value.prompt, "1) 재현\n  2) 수정");
+  const empty = validateWorkflow({ ...v2(), prompt: "   " });
+  assert.ok(empty.ok);
+  assert.equal(empty.value.prompt, "");
+});
+
+test("단계에 넣은 prompt 키는 저장하지 않는다 — 단계별 프롬프트 폐기 (2026-11-24)", () => {
+  const steps = v2().steps.map((s, i) => (i === 0 ? { ...s, prompt: "x" } : s));
+  const r = validateWorkflow({ ...v2(), steps });
+  assert.ok(r.ok);
+  assert.equal("prompt" in r.value.steps[0], false);
 });
 
 test("parseTopic: enum만 통과, 나머지 null (BR-029 라이브러리 무시)", () => {

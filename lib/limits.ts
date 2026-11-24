@@ -18,7 +18,7 @@ export const LIMITS = {
   prerequisites: { min: 0, max: 500 }, // BR-028
   caveats: { min: 0, max: 500 }, // BR-028
   tested_env: { min: 0, max: 200 }, // BR-028 — 작성자 자기 신고
-  step_prompt: { min: 0, max: 2000 }, // BR-028
+  prompt: { min: 0, max: 2000 }, // BR-028 — 워크플로우당 추천 프롬프트 1개 (2026-11-24)
   search_q: { max: 50 }, // BR-033
 } as const;
 
@@ -46,7 +46,7 @@ export type WorkflowInput = {
   title: string;
   situation_short: string;
   situation: string;
-  steps: { tool: { name: string; category: Category; custom?: boolean; url?: string }; note: string; detail: string; prompt?: string }[];
+  steps: { tool: { name: string; category: Category; custom?: boolean; url?: string }; note: string; detail: string }[];
   dev_stack: { name: string; category: DevStackCategory }[];
   role: string;
   accent: string;
@@ -56,6 +56,7 @@ export type WorkflowInput = {
   prerequisites: string;
   caveats: string;
   tested_env: string;
+  prompt: string;
 };
 
 // "자" = 사용자가 보는 글자 수 (grapheme) — 이모지 1개 = 1자 (BR-003)
@@ -126,13 +127,7 @@ export function validateWorkflow(input: unknown): Result<WorkflowInput> {
     const url = toolUrl(tool.url);
     if (url === null) return fail("ERR-BLDR-009", `steps.${i}.tool.url`);
     if (url) t.url = url;
-    // 프롬프트 (BR-028) — 원문 보존(trim 안 함, 복사용 BR-032). 공백뿐이면 키 제거
-    const step: WorkflowInput["steps"][number] = { tool: t, note, detail };
-    if (s.prompt !== undefined && s.prompt !== null) {
-      if (typeof s.prompt !== "string" || charCount(s.prompt) > LIMITS.step_prompt.max) return fail("ERR-BLDR-010", `steps.${i}.prompt`);
-      if (s.prompt.trim()) step.prompt = s.prompt;
-    }
-    steps.push(step);
+    steps.push({ tool: t, note, detail }); // 단계 prompt 키는 받지 않는다 (2026-11-24 워크플로우당 1개로)
   }
 
   const rawStack = d.dev_stack ?? [];
@@ -158,6 +153,10 @@ export function validateWorkflow(input: unknown): Result<WorkflowInput> {
     if (v === null) return fail("ERR-BLDR-010", k);
     detailValues[k] = v;
   }
+  // 추천 프롬프트 (BR-028·032) — 원문 보존(trim 안 함, 복사용). 공백뿐이면 ""
+  const rawPrompt = d.prompt ?? "";
+  if (typeof rawPrompt !== "string" || charCount(rawPrompt) > LIMITS.prompt.max) return fail("ERR-BLDR-010", "prompt");
+  const prompt = rawPrompt.trim() ? rawPrompt : "";
 
   return {
     ok: true,
@@ -167,6 +166,7 @@ export function validateWorkflow(input: unknown): Result<WorkflowInput> {
       is_public: d.is_public !== false, // 기본 true (BR-017)
       topic,
       ...detailValues,
+      prompt,
     },
   };
 }

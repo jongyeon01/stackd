@@ -278,20 +278,6 @@ export default function WorkflowBuilder({ initial }: Props) {
                         <span style={{ wordBreak: "keep-all" }}>공개된 도구가 아니에요 — 카드에 표시할게요</span>
                       </Label>
                     )}
-                    {/* 단계 프롬프트 (EL-HOME-032, BR-028) — 복사용 원문이라 mono, 시크릿 금지 안내 상시 */}
-                    <details className="mt-1" open={Boolean(s.prompt) || undefined}>
-                      <summary className="cursor-pointer text-sm text-muted-foreground">프롬프트·설정 (선택)</summary>
-                      <div className="mt-2 grid gap-1">
-                        <Label htmlFor={`prompt-${i}`} className="sr-only">단계 {i + 1} 프롬프트·설정</Label>
-                        <Textarea id={`prompt-${i}`} rows={4} className="font-mono text-sm" value={s.prompt ?? ""}
-                          onChange={(e) => limited(`prompt-${i}`, LIMITS.step_prompt.max, (v) => patchStep(i, { prompt: v }))(e.target.value)}
-                          placeholder="이 단계에서 쓴 프롬프트, 명령어, 설정 예시를 그대로 붙여 넣으세요" aria-describedby={`prompt-${i}-note`} />
-                        <div className="flex items-start justify-between gap-4">
-                          <p id={`prompt-${i}-note`} className="text-xs text-muted-foreground">API 키·비밀번호·개인정보는 넣지 마세요 — 공개되면 누구나 복사할 수 있어요</p>
-                          <Counter n={charCount(s.prompt ?? "")} max={LIMITS.step_prompt.max} over={over === `prompt-${i}`} />
-                        </div>
-                      </div>
-                    </details>
                     {incomplete && <p className="text-xs text-destructive">각 단계에 한 줄 메모와 설명을 채워주세요</p>}
                   </Card>
                 </li>
@@ -307,6 +293,19 @@ export default function WorkflowBuilder({ initial }: Props) {
             </div>
           )}
         </fieldset>
+
+        {/* 추천 프롬프트 (EL-HOME-032, BR-028) — 워크플로우당 1개, 단계를 한 번에 실행하는 지시 (2026-11-24) */}
+        <div className="grid gap-2">
+          <div className="flex items-baseline justify-between gap-4">
+            <Label htmlFor="prompt" className="text-sm font-medium">추천 프롬프트 (선택) — 이 워크플로우를 한 번에 실행하는 지시</Label>
+            <Counter n={charCount(d.prompt)} max={LIMITS.prompt.max} over={over === "prompt"} />
+          </div>
+          <Textarea id="prompt" rows={5} className="font-mono text-sm" value={d.prompt}
+            onChange={(e) => limited("prompt", LIMITS.prompt.max, (s) => setD({ ...d, prompt: s }))(e.target.value)}
+            placeholder={"예: 이 버그를 고쳐줘. 1) 재현 조건을 문장으로 적고 2) 호출부를 전부 찾은 뒤 3) 원인 한 곳만 고쳐"}
+            aria-describedby="prompt-note" />
+          <p id="prompt-note" className="text-xs text-muted-foreground">API 키·비밀번호·개인정보는 넣지 마세요 — 공개되면 누구나 복사할 수 있어요</p>
+        </div>
 
         {/* 개발 스택 태그 (EL-HOME-012) */}
         <fieldset className="grid gap-3" aria-labelledby="stack-label">

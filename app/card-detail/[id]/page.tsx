@@ -284,6 +284,19 @@ export default async function CardDetailPage({ params }: Params) {
 
       <DetailSections wf={wf} sections={DETAIL_SECTIONS} />
 
+      {/* EL-WF-014 추천 프롬프트 — 워크플로우당 1개, 단계 흐름을 한 번에 실행하는 지시. 복사만 (BR-032) */}
+      {wf.prompt && (
+        <section className="mt-12">
+          <h2 className="text-lg font-semibold tracking-[-0.015em]">추천 프롬프트</h2>
+          <div className="mt-3 max-w-[62ch] rounded-lg border border-border bg-muted/50">
+            <pre id="wf-prompt" className="overflow-x-auto whitespace-pre-wrap px-4 py-3 font-mono text-[0.8125rem] leading-[1.6]">{wf.prompt}</pre>
+            <div className="flex justify-end border-t border-border px-2 py-1.5">
+              <PromptCopy id={wf.id} text={wf.prompt} />
+            </div>
+          </div>
+        </section>
+      )}
+
       {/* EL-WF-004 단계별 설명 — 카드에서 잘린 메모 전문이 여기 있다 */}
       <section className="mt-12">
         <h2 className="text-lg font-semibold tracking-[-0.015em]">단계별 설명</h2>
@@ -302,15 +315,6 @@ export default async function CardDetailPage({ params }: Params) {
               <p className="mt-1 text-base leading-[1.75]">{s.note}</p>
               {s.detail && (
                 <p className="mt-2 whitespace-pre-wrap text-sm leading-[1.75] text-muted-foreground">{s.detail}</p>
-              )}
-              {/* EL-WF-014 프롬프트·설정 — 코드 블록이라 가로 스크롤 허용, 복사만 (BR-032) */}
-              {s.prompt && (
-                <div className="mt-3 rounded-lg border border-border bg-muted/50">
-                  <pre id={`prompt-${i}`} className="overflow-x-auto px-4 py-3 font-mono text-[0.8125rem] leading-[1.6]">{s.prompt}</pre>
-                  <div className="flex justify-end border-t border-border px-2 py-1.5">
-                    <PromptCopy id={wf.id} index={i} text={s.prompt} />
-                  </div>
-                </div>
               )}
             </li>
           ))}

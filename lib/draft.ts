@@ -22,6 +22,7 @@ export const EMPTY_DRAFT: Draft = {
   prerequisites: "",
   caveats: "",
   tested_env: "",
+  prompt: "",
 };
 
 // 필수 키가 전부 있고 v가 맞을 때만 초안으로 인정 — 나머지는 손상 취급
@@ -66,7 +67,7 @@ export function clearDraft() {
 // 복원 배너를 띄울 가치가 있나 — 입력이 하나도 없으면 false
 export function isDraftEmpty(d: Draft) {
   return !d.title && !d.situation_short && !d.situation && d.steps.length === 0 && d.dev_stack.length === 0 && !d.role
-    && !d.topic && !d.expected_result && !d.prerequisites && !d.caveats && !d.tested_env;
+    && !d.topic && !d.expected_result && !d.prerequisites && !d.caveats && !d.tested_env && !d.prompt;
 }
 
 // `/card` 다녀옴 표시 — 홈 복귀 시 배너 없이 즉시 복원용 (SCR-001 §6 뒤로가기)

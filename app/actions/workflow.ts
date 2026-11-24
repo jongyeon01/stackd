@@ -104,7 +104,7 @@ export async function togglePublic(id: string, isPublic: boolean): Promise<Actio
 
 // 복제 시 원본에서 옮기는 필드 — 소유·공개·출처·작성자는 새로 정한다 (BR-030)
 const FORK_FIELDS =
-  "id, user_id, title, situation_short, situation, topic, expected_result, prerequisites, caveats, tested_env, steps, dev_stack, accent";
+  "id, user_id, title, situation_short, situation, topic, expected_result, prerequisites, caveats, tested_env, prompt, steps, dev_stack, accent";
 
 // 복제 — 남의 공개 워크플로우를 비공개 사본으로 (PRD-06 forkWorkflow, BR-030)
 export async function forkWorkflow(id: string): Promise<SaveResult> {

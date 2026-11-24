@@ -19,7 +19,7 @@ export async function generateMetadata({ searchParams }: { searchParams: Promise
 
 // 빌더에 실을 필드만 — id·user_id·작성자 스냅샷은 저장 시 서버가 다시 채운다 (BR-025)
 const EDIT_COLUMNS =
-  "title, situation_short, situation, steps, dev_stack, role, accent, is_public, topic, expected_result, prerequisites, caveats, tested_env, forked_from";
+  "title, situation_short, situation, steps, dev_stack, role, accent, is_public, topic, expected_result, prerequisites, caveats, tested_env, prompt, forked_from";
 
 // SCR-001 v4 — 빌더 전용 페이지 (2.0 랜딩 분리)
 export default async function CreatePage({ searchParams }: { searchParams: Promise<{ edit?: string }> }) {

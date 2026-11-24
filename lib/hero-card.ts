@@ -64,4 +64,5 @@ export const HERO_CARD: WorkflowInput = {
   prerequisites: "",
   caveats: "",
   tested_env: "",
+  prompt: "",
 };

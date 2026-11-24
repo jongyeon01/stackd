@@ -83,9 +83,11 @@ test("2.0 키 없는 구 초안 → 빈 값 보충 후 복원", () => {
   assert.equal(d.topic, "");
   assert.equal(d.expected_result, "");
   assert.equal(d.tested_env, "");
+  assert.equal(d.prompt, "");
 });
 
 test("isDraftEmpty: 2.0 필드만 입력해도 false", () => {
   assert.equal(isDraftEmpty({ ...EMPTY_DRAFT, topic: "debug" }), false);
   assert.equal(isDraftEmpty({ ...EMPTY_DRAFT, caveats: "비용 주의" }), false);
+  assert.equal(isDraftEmpty({ ...EMPTY_DRAFT, prompt: "1) 재현" }), false);
 });
