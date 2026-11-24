@@ -7,6 +7,14 @@ import { toast } from "sonner";
 import { forkWorkflow, toggleBookmark } from "@/app/actions/workflow";
 import { signInWithGitHub } from "@/app/auth/actions";
 import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { track } from "@/lib/analytics";
 
 type Props = { id: string; loggedIn: boolean; bookmarked: boolean };
@@ -19,8 +27,7 @@ export default function WorkflowEngage({ id, loggedIn, bookmarked }: Props) {
   const params = useSearchParams();
   const [saved, setSaved] = useState(bookmarked); // 낙관적 값 — 실패하면 되돌린다
   const [pending, startTransition] = useTransition();
-  const loginForm = useRef<HTMLFormElement>(null);
-  const nextInput = useRef<HTMLInputElement>(null);
+  const [gateAct, setGateAct] = useState<Act | null>(null); // 로그인 안내 dialog 대상 (EL-WF-017)
   const ran = useRef(false);
 
   function fork() {
@@ -52,13 +59,13 @@ export default function WorkflowEngage({ id, loggedIn, bookmarked }: Props) {
     });
   }
 
-  // 비로그인 클릭 = 로그인 벽. 복귀 주소에 act를 실어 돌아오면 1회 실행 (REQ-WF-008·009 AC-5)
+  // 비로그인 클릭 = 로그인 벽. 바로 보내지 않고 안내부터 (EL-WF-017, REQ-WF-008·009 AC-5)
+  // gate 이벤트는 클릭 시점 그대로 — 로그인 벽 비용의 기준점 (PRD-15)
   function gate(act: Act) {
     track(act === "fork" ? "workflow_fork" : "workflow_bookmark", { workflow_id: id, stage: "gate" });
-    // state를 거치면 제출 시점에 값이 아직 반영되지 않는다 — DOM 값을 직접 넣고 바로 제출
-    if (nextInput.current) nextInput.current.value = `${pathname}?act=${act}`;
-    loginForm.current?.requestSubmit();
+    setGateAct(act);
   }
+  const actLabel = gateAct === "fork" ? "복제" : "저장";
 
   // OAuth 복귀 — act는 URL에서 먼저 지워 새로고침해도 중복 실행하지 않는다
   useEffect(() => {
@@ -92,10 +99,27 @@ export default function WorkflowEngage({ id, loggedIn, bookmarked }: Props) {
       <p className="mt-3 max-w-[62ch] text-sm leading-[1.75] text-muted-foreground">
         저장은 원본을 보관함에 담고, 복제는 내 워크플로우로 가져와 고칠 수 있어요
       </p>
-      {/* 비로그인 게이트 — 헤더와 같은 서버 액션, 복귀 주소만 다르다 */}
-      <form ref={loginForm} action={signInWithGitHub} hidden>
-        <input ref={nextInput} type="hidden" name="next" defaultValue={pathname} />
-      </form>
+      {/* EL-WF-017 로그인 안내 — 헤더와 같은 서버 액션, 복귀 주소에 act를 실어 돌아오면 1회 실행 */}
+      <Dialog open={gateAct !== null} onOpenChange={(open) => !open && setGateAct(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>로그인이 필요해요</DialogTitle>
+            <DialogDescription>
+              {actLabel}하려면 GitHub 로그인이 필요해요. 로그인 후 이 페이지로 돌아와 바로 {actLabel}돼요.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            {/* 터치 타깃 44px (DESIGN.md §접근성) — dialog 기본 버튼은 32px */}
+            <Button variant="outline" onClick={() => setGateAct(null)} className="h-11 px-5">
+              취소
+            </Button>
+            <form action={signInWithGitHub} className="w-full sm:w-auto">
+              <input type="hidden" name="next" value={`${pathname}?act=${gateAct ?? "bookmark"}`} />
+              <Button type="submit" className="h-11 w-full px-5">GitHub으로 로그인</Button>
+            </form>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
