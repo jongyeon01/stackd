@@ -108,7 +108,7 @@ export default async function MePage({ searchParams }: { searchParams: Promise<{
 // 공통 틀 — h1·설정 링크·탭 (EL-ME-001·002·011)
 function Shell({ tab, children }: { tab: "mine" | "saved"; children: React.ReactNode }) {
   return (
-    <main className="mx-auto w-full max-w-5xl flex-1 px-4 py-10 sm:px-6 lg:px-8 lg:py-14">
+    <main className="container-page flex-1 py-10 lg:py-14">
       <div className="flex flex-wrap items-baseline justify-between gap-4">
         {/* EL-ME-001 페이지 유일 h1 (CPY-ME-001) */}
         <h1 className="text-2xl font-semibold tracking-[-0.015em] sm:text-3xl">내 보관함</h1>
