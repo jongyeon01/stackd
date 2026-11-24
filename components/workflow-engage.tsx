@@ -109,12 +109,13 @@ export default function WorkflowEngage({ id, loggedIn, bookmarked }: Props) {
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setGateAct(null)}>
+            {/* 터치 타깃 44px (DESIGN.md §접근성) — dialog 기본 버튼은 32px */}
+            <Button variant="outline" onClick={() => setGateAct(null)} className="h-11 px-5">
               취소
             </Button>
-            <form action={signInWithGitHub}>
+            <form action={signInWithGitHub} className="w-full sm:w-auto">
               <input type="hidden" name="next" value={`${pathname}?act=${gateAct ?? "bookmark"}`} />
-              <Button type="submit" className="w-full">GitHub으로 로그인</Button>
+              <Button type="submit" className="h-11 w-full px-5">GitHub으로 로그인</Button>
             </form>
           </DialogFooter>
         </DialogContent>
