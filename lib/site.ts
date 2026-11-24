@@ -32,3 +32,10 @@ export const BASE_OG = {
 } satisfies Metadata["openGraph"];
 export const SITE_DESCRIPTION =
   "도구는 아는데 어떻게 쓰는지 모른다면 — 실제 개발자들의 AI 워크플로우를 카드 한 장으로 공유하고 라이브러리에서 예시를 보세요.";
+
+// 헤더 링크 — 데스크톱(서버)·모바일 시트(클라이언트) 공용 (CPY-COMMON-007·012, CPY-ME-001)
+export const NAV = [
+  { href: "/workflows", label: "탐색" },
+  { href: "/create", label: "워크플로우 만들기" },
+  { href: "/me", label: "내 보관함", auth: true },
+];

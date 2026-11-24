@@ -6,7 +6,7 @@ declare global {
   }
 }
 
-// 커스텀 이벤트는 이 7종이 전부 (PRD-15). 타입으로 오타를 막는다
+// 커스텀 이벤트는 이 10종이 전부 (PRD-15 v3). 타입으로 오타를 막는다
 export type GaEvent =
   | "step_add" // EVT-BLDR-001
   | "card_create" // EVT-CARD-001 (H-01)
@@ -14,7 +14,10 @@ export type GaEvent =
   | "card_edit" // EVT-CARD-003
   | "card_share" // EVT-SHARE-001 (H-02)
   | "card_reshare" // EVT-SHARE-002
-  | "login"; // EVT-AUTH-001
+  | "login" // EVT-AUTH-001
+  | "prompt_copy" // EVT-WF-001 (2.0)
+  | "workflow_fork" // EVT-WF-002 — stage: gate|done
+  | "workflow_bookmark"; // EVT-WF-003 — stage: gate|done
 
 type GaParams = Record<string, string | number | boolean>;
 

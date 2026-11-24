@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { PAGE_SIZE, pageCount, pageRange, pageWindow, parsePage } from "./paginate.ts";
+import { PAGE_SIZE, pageCount, pageRange, pageWindow, parsePage, libraryHref } from "./paginate.ts";
 
 // TC-LIB-002-03 — 잘못된 ?page는 조용히 1페이지 (REQ-LIB-001 AC-2)
 test("?page 정규화 — 비정수·0·음수·빈 값은 1페이지", () => {
@@ -40,4 +40,12 @@ test("pageWindow — 7페이지 이하는 전부, 초과 시 처음/끝/현재 �
   assert.deepEqual(pageWindow(5, 10), [1, "ellipsis", 4, 5, 6, "ellipsis", 10]);
   assert.deepEqual(pageWindow(1, 20), [1, 2, "ellipsis", 20]);
   assert.deepEqual(pageWindow(20, 20), [1, "ellipsis", 19, 20]);
+});
+
+// 2.0 — 필터(topic·q)를 유지한 라이브러리 링크 (REQ-LIB-003·004, TC-LIB-003-02)
+test("libraryHref — 빈 값은 생략, page 1은 생략, q는 인코딩", () => {
+  assert.equal(libraryHref({}), "/workflows");
+  assert.equal(libraryHref({ topic: "review", page: 2 }), "/workflows?topic=review&page=2");
+  assert.equal(libraryHref({ q: "코드 리뷰", page: 1 }), "/workflows?q=%EC%BD%94%EB%93%9C+%EB%A6%AC%EB%B7%B0");
+  assert.equal(libraryHref({ topic: null, q: "" }), "/workflows");
 });

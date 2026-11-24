@@ -101,3 +101,62 @@ export async function togglePublic(id: string, isPublic: boolean): Promise<Actio
   revalidatePath("/me"); // 배지·스위치의 원본은 서버다 (REQ-ME-004 AC-1)
   return { ok: true };
 }
+
+// 복제 시 원본에서 옮기는 필드 — 소유·공개·출처·작성자는 새로 정한다 (BR-030)
+const FORK_FIELDS =
+  "id, user_id, title, situation_short, situation, topic, expected_result, prerequisites, caveats, tested_env, prompt, steps, dev_stack, accent";
+
+// 복제 — 남의 공개 워크플로우를 비공개 사본으로 (PRD-06 forkWorkflow, BR-030)
+export async function forkWorkflow(id: string): Promise<SaveResult> {
+  const supabase = await createClient();
+  const { data: claims } = await supabase.auth.getClaims();
+  const userId = claims?.claims.sub;
+  if (!userId) return { ok: false, code: "ERR-AUTH-001" };
+
+  // 공개·비hidden·타인 소유만 — 그 외는 존재를 구분하지 않고 같은 코드 (ERR-WF-001)
+  const { data: src } = await supabase
+    .from("workflows")
+    .select(FORK_FIELDS)
+    .eq("id", id)
+    .eq("is_public", true)
+    .eq("hidden", false)
+    .maybeSingle();
+  if (!src || src.user_id === userId) return { ok: false, code: "ERR-WF-001" };
+
+  const { id: originId, user_id: _owner, ...fields } = src; // eslint-disable-line @typescript-eslint/no-unused-vars -- 소유자는 버린다
+  const meta = claims.claims.user_metadata ?? {};
+  const row = {
+    ...fields,
+    forked_from: originId,
+    is_public: false, // 변조 재배포 방지 — 공개는 복제자가 직접 (PRD-08 악용 #9)
+    role: null, // 소속은 원작자 것이라 비운다
+    author_handle: (meta.user_name as string | undefined) ?? "unknown",
+    author_avatar: (meta.avatar_url as string | undefined) ?? null,
+    user_id: userId,
+  };
+
+  for (let i = 0; i < 3; i++) {
+    const { data, error } = await supabase.from("workflows").insert({ ...row, id: newId() }).select("id").single();
+    if (data) {
+      revalidatePath("/me");
+      return { ok: true, id: data.id };
+    }
+    if (error?.code !== "23505") break; // id 충돌만 재시도 (BR-023)
+  }
+  return { ok: false, code: "ERR-WF-003" };
+}
+
+// 저장 토글 — on: 멱등 insert / off: 내 행 delete (PRD-06 toggleBookmark, BR-031)
+export async function toggleBookmark(id: string, on: boolean): Promise<ActionResult> {
+  const supabase = await createClient();
+  const userId = await currentUserId(supabase);
+  if (!userId) return { ok: false, code: "ERR-AUTH-001" };
+
+  // 공개·비hidden 검사는 RLS insert 정책이 한다 (PRD-05) — 거부되면 error
+  const { error } = on
+    ? await supabase.from("bookmarks").upsert({ user_id: userId, workflow_id: id }, { ignoreDuplicates: true })
+    : await supabase.from("bookmarks").delete().eq("user_id", userId).eq("workflow_id", id);
+  if (error) return { ok: false, code: "ERR-WF-002" };
+  revalidatePath("/me");
+  return { ok: true };
+}

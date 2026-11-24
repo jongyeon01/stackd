@@ -12,7 +12,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
-// 헤더 계정 메뉴 (lg 이상) — @핸들을 눌러 내 카드·설정·로그아웃을 연다
+// 헤더 계정 메뉴 (lg 이상) — @핸들을 눌러 설정·로그아웃을 연다 (내 보관함은 2.0부터 헤더 링크)
 // lg 미만은 mobile-nav의 Sheet가 같은 항목을 갖는다 (중복 렌더 없음)
 export default function UserMenu({ handle }: { handle: string }) {
   const [pending, startTransition] = useTransition();
@@ -30,9 +30,6 @@ export default function UserMenu({ handle }: { handle: string }) {
       </DropdownMenuTrigger>
 
       <DropdownMenuContent align="end" className="w-40">
-        <DropdownMenuItem asChild>
-          <Link href="/me">내 카드</Link>
-        </DropdownMenuItem>
         <DropdownMenuItem asChild>
           <Link href="/settings">설정</Link>
         </DropdownMenuItem>

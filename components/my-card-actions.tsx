@@ -84,7 +84,7 @@ export default function MyCardActions({ id, isPublic, hidden, hiddenReason }: Pr
         <div className="ml-auto flex gap-2">
           {/* EL-ME-006 — 로드·소유자 확인은 SCR-001 몫 (REQ-ME-005) */}
           <Button asChild variant="outline" className="h-11 px-5">
-            <Link href={`/?edit=${id}`}>수정</Link>
+            <Link href={`/create?edit=${id}`}>수정</Link>
           </Button>
           <Button
             variant="outline"

@@ -1,11 +1,11 @@
 // 빌더 초안 — localStorage `stackd:draft` (BR-019, PRD-05 §클라이언트 초안). 순수 함수만, 서버 저장소 아님
-import type { WorkflowInput } from "./limits";
+import type { Topic, WorkflowInput } from "./limits";
 
 export const DRAFT_KEY = "stackd:draft";
 const VERSION = 2;
 
-// 초안 = 검증 전 입력값 + 버전 + (수정 모드) editId. WorkflowInput과 필드가 같아 검증 유틸을 그대로 통과시킨다
-export type Draft = WorkflowInput & { v: typeof VERSION; editId?: string };
+// 초안 = 검증 전 입력값 + 버전 + (수정 모드) editId. 주제는 선택 전 "" 허용 — 그 외 필드는 검증 유틸에 그대로 넣는다
+export type Draft = Omit<WorkflowInput, "topic"> & { topic: Topic | ""; v: typeof VERSION; editId?: string };
 
 export const EMPTY_DRAFT: Draft = {
   v: VERSION,
@@ -17,6 +17,12 @@ export const EMPTY_DRAFT: Draft = {
   role: "",
   accent: "ink",
   is_public: true,
+  topic: "",
+  expected_result: "",
+  prerequisites: "",
+  caveats: "",
+  tested_env: "",
+  prompt: "",
 };
 
 // 필수 키가 전부 있고 v가 맞을 때만 초안으로 인정 — 나머지는 손상 취급
@@ -33,7 +39,8 @@ export function loadDraft(): Draft | null {
     const raw = localStorage.getItem(DRAFT_KEY);
     if (!raw) return null;
     const parsed: unknown = JSON.parse(raw);
-    if (isDraft(parsed)) return parsed;
+    // 2.0 키는 v를 올리지 않고 빈 값으로 보충 — 구 초안을 폐기하지 않는다 (PRD-05)
+    if (isDraft(parsed)) return { ...EMPTY_DRAFT, ...parsed };
   } catch {
     /* JSON 손상 또는 localStorage 접근 불가 */
   }
@@ -59,7 +66,8 @@ export function clearDraft() {
 
 // 복원 배너를 띄울 가치가 있나 — 입력이 하나도 없으면 false
 export function isDraftEmpty(d: Draft) {
-  return !d.title && !d.situation_short && !d.situation && d.steps.length === 0 && d.dev_stack.length === 0 && !d.role;
+  return !d.title && !d.situation_short && !d.situation && d.steps.length === 0 && d.dev_stack.length === 0 && !d.role
+    && !d.topic && !d.expected_result && !d.prerequisites && !d.caveats && !d.tested_env && !d.prompt;
 }
 
 // `/card` 다녀옴 표시 — 홈 복귀 시 배너 없이 즉시 복원용 (SCR-001 §6 뒤로가기)

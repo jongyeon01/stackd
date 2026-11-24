@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { CATEGORIES, LIMITS, charCount, matchesHandle, validateFeedbackBody, validateRole, validateWorkflow } from "./limits.ts";
+import { CATEGORIES, LIMITS, TOPICS, charCount, likePattern, matchesHandle, normalizeQuery, parseTopic, validateFeedbackBody, validateRole, validateWorkflow } from "./limits.ts";
 
 // 유효한 최소 입력 — 각 테스트가 한 필드씩 깨뜨려 사용
 const valid = () => ({
@@ -15,6 +15,7 @@ const valid = () => ({
   role: "",
   accent: "ink",
   is_public: true,
+  topic: "review", // 2.0 필수 (BR-029)
 });
 
 test("제목이 비면 ERR-BLDR-003 (BR-010)", () => {
@@ -207,4 +208,62 @@ test("custom 도구도 url을 가질 수 있다 (BR-027)", () => {
   Object.assign(v.steps[0].tool, { name: "commit-push", category: "skill", custom: true, url: "https://x.com" });
   const r = validateWorkflow(v);
   assert.deepEqual(r.ok && r.value.steps[0].tool, { name: "commit-push", category: "skill", custom: true, url: "https://x.com/" });
+});
+
+// ── Stackd 2.0 (BR-028·029·033) ──
+const v2 = valid;
+
+test("주제 없거나 enum 밖 → ERR-BLDR-011, 6종은 통과 (BR-029)", () => {
+  assert.deepEqual(validateWorkflow({ ...valid(), topic: undefined }), { ok: false, code: "ERR-BLDR-011", field: "topic" });
+  assert.equal(validateWorkflow({ ...valid(), topic: "xyz" }).ok, false);
+  for (const t of TOPICS) assert.equal(validateWorkflow({ ...valid(), topic: t }).ok, true);
+});
+
+test("상세 템플릿 필드 상한 초과 → ERR-BLDR-010, 비면 빈 문자열 (BR-028)", () => {
+  const over = { expected_result: 301, prerequisites: 501, caveats: 501, tested_env: 201 } as const;
+  for (const [k, n] of Object.entries(over)) {
+    assert.deepEqual(validateWorkflow({ ...v2(), [k]: "a".repeat(n) }), { ok: false, code: "ERR-BLDR-010", field: k });
+    assert.equal(validateWorkflow({ ...v2(), [k]: "a".repeat(n - 1) }).ok, true);
+  }
+  const r = validateWorkflow(v2());
+  assert.ok(r.ok);
+  assert.equal(r.value.expected_result, "");
+  assert.equal(r.value.topic, "review");
+});
+
+test("추천 프롬프트는 워크플로우당 1개, 2001자 → ERR-BLDR-010, 원문 줄바꿈 유지 (BR-028)", () => {
+  assert.deepEqual(validateWorkflow({ ...v2(), prompt: "a".repeat(2001) }), { ok: false, code: "ERR-BLDR-010", field: "prompt" });
+  const kept = validateWorkflow({ ...v2(), prompt: "1) 재현\n  2) 수정" });
+  assert.ok(kept.ok);
+  assert.equal(kept.value.prompt, "1) 재현\n  2) 수정");
+  const empty = validateWorkflow({ ...v2(), prompt: "   " });
+  assert.ok(empty.ok);
+  assert.equal(empty.value.prompt, "");
+});
+
+test("단계에 넣은 prompt 키는 저장하지 않는다 — 단계별 프롬프트 폐기 (2026-11-24)", () => {
+  const steps = v2().steps.map((s, i) => (i === 0 ? { ...s, prompt: "x" } : s));
+  const r = validateWorkflow({ ...v2(), steps });
+  assert.ok(r.ok);
+  assert.equal("prompt" in r.value.steps[0], false);
+});
+
+test("parseTopic: enum만 통과, 나머지 null (BR-029 라이브러리 무시)", () => {
+  assert.equal(parseTopic("debug"), "debug");
+  assert.equal(parseTopic("xyz"), null);
+  assert.equal(parseTopic(undefined), null);
+  assert.equal(parseTopic(["debug"]), null);
+});
+
+test("normalizeQuery: trim·50자 절삭·빈 값은 '' (BR-033)", () => {
+  assert.equal(normalizeQuery("  코드 리뷰 "), "코드 리뷰");
+  assert.equal(normalizeQuery("가".repeat(60)), "가".repeat(50));
+  assert.equal(normalizeQuery("   "), "");
+  assert.equal(normalizeQuery(undefined), "");
+  assert.equal(normalizeQuery(["a"]), "");
+});
+
+test("likePattern: 소문자화 + %·_·\\ 리터럴 이스케이프 (BR-033)", () => {
+  assert.equal(likePattern("Playwright"), "%playwright%");
+  assert.equal(likePattern("50%_a\\b"), "%50\\%\\_a\\\\b%");
 });

@@ -25,7 +25,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   return [
     { url: `${BASE}/`, lastModified: latest },
-    { url: `${BASE}/workflows`, lastModified: latest }, // SCR-006 — 컷 판정 시 이 줄도 제거
+    { url: `${BASE}/create` }, // SCR-001 빌더 (2.0 랜딩 분리)
+    { url: `${BASE}/workflows`, lastModified: latest }, // SCR-006 — 2.0 탐색 착지
     { url: `${BASE}/privacy` },
     { url: `${BASE}/terms` },
     ...details,

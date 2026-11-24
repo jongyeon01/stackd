@@ -11,6 +11,9 @@ import JsonLd from "@/components/json-ld";
 import { Badge } from "@/components/ui/badge";
 import { Button, buttonVariants } from "@/components/ui/button";
 import CardTransition from "@/components/card-transition";
+import PromptCopy from "@/components/prompt-copy";
+import WorkflowEngage from "@/components/workflow-engage";
+import { Suspense } from "react";
 import WorkflowCard from "@/components/workflow-card";
 import type { WorkflowInput } from "@/lib/limits";
 import { catalogSource } from "@/lib/catalog";
@@ -28,6 +31,7 @@ type Row = WorkflowInput & {
   hidden_reason: string | null;
   created_at: string;
   updated_at: string;
+  forked_from: string | null; // 2.0 복제 원본 (BR-030)
 };
 
 // id 형식이 어긋나면 조회 없이 없는 것으로 (BR-023·006)
@@ -38,8 +42,34 @@ const getWorkflow = cache(async (id: string) => {
   // RLS가 비공개 타인 행을 이미 걸러낸다 — 여기 null = 없음이거나 권한 없음 (BR-006)
   const { data } = await supabase.from("workflows").select("*").eq("id", id).maybeSingle();
   const { data: claims } = await supabase.auth.getClaims();
-  return data ? { wf: data as Row, isOwner: claims?.claims.sub === data.user_id } : null;
+  const uid = claims?.claims.sub;
+  return data ? { wf: data as Row, uid, isOwner: uid === data.user_id } : null;
 });
+
+// 2.0 보조 조회 (PRD-06 §읽기 SCR-004) — 원본 표기 + 저장 여부. 실패는 미표시로 흡수
+async function getEngageState(wf: Row, uid: string | undefined) {
+  const supabase = await createClient();
+  const [origin, saved] = await Promise.all([
+    wf.forked_from
+      ? supabase.from("workflows").select("id, title, author_handle").eq("id", wf.forked_from)
+          .eq("is_public", true).eq("hidden", false).maybeSingle()
+      : null,
+    uid
+      ? supabase.from("bookmarks").select("workflow_id").eq("user_id", uid).eq("workflow_id", wf.id).maybeSingle()
+      : null,
+  ]);
+  return { origin: origin?.data ?? null, bookmarked: Boolean(saved?.data) };
+}
+
+// 상세 템플릿 섹션 (EL-WF-013) — 순서·제목은 CPY-WF-019~022
+const DETAIL_SECTIONS = [
+  { key: "expected_result", title: "예상 결과" },
+  { key: "prerequisites", title: "준비물" },
+] as const;
+const DETAIL_SECTIONS_AFTER = [
+  { key: "caveats", title: "주의사항" },
+  { key: "tested_env", title: "작성자가 확인한 환경", note: "작성자 자기 신고" },
+] as const;
 
 export async function generateMetadata({ params }: Params): Promise<Metadata> {
   const { id } = await params;
@@ -83,8 +113,10 @@ export default async function CardDetailPage({ params }: Params) {
   const found = await getWorkflow(id);
   if (!found) notFound(); // ERR-SHARE-001
 
-  const { wf, isOwner } = found;
+  const { wf, isOwner, uid } = found;
   const links = toolLinks(wf.steps); // 카드·단계 목록 공용 (BR-027)
+  const { origin, bookmarked } = await getEngageState(wf, uid);
+  const canEngage = !isOwner && wf.is_public && !wf.hidden; // 복제·저장 노출 조건 (BR-030·031)
 
   // hidden은 404가 아니라 블러 — 타인에게는 내용을 렌더하지 않는다 (BR-018, EL-WF-011)
   if (wf.hidden && !isOwner) {
@@ -98,7 +130,7 @@ export default async function CardDetailPage({ params }: Params) {
         <p className="mt-6 max-w-[62ch] text-sm leading-[1.75] text-muted-foreground">
           신고 검토로 숨겨진 워크플로우예요 — 사유: {wf.hidden_reason}
         </p>
-        <Link href="/?utm_source=card&utm_medium=share" className={`${buttonVariants({ size: "lg" })} mt-8 h-11 px-6`}>
+        <Link href="/create?utm_source=card&utm_medium=share" className={`${buttonVariants({ size: "lg" })} mt-8 h-11 px-6`}>
           나도 내 워크플로우 카드 만들기
         </Link>
       </main>
@@ -196,12 +228,30 @@ export default async function CardDetailPage({ params }: Params) {
             {wf.role && <span className="text-sm text-muted-foreground">· {wf.role}</span>}
           </div>
 
+          {/* EL-WF-012 원본 표기 — 복제본이면 항상, 지울 수 없다 (BR-030) */}
+          {wf.forked_from && (
+            <p className="mt-3 text-sm text-muted-foreground">
+              {origin ? (
+                <>원본: <Link href={`/card-detail/${origin.id}`} className="underline underline-offset-4">{origin.title} — @{origin.author_handle}</Link></>
+              ) : (
+                "원본을 볼 수 없어요"
+              )}
+            </p>
+          )}
+
+          {/* EL-WF-015·016 저장·복제 — 타인의 공개 워크플로우에만 (2.0 판정 측정 행동) */}
+          {canEngage && (
+            <Suspense>
+              <WorkflowEngage id={wf.id} loggedIn={Boolean(uid)} bookmarked={bookmarked} />
+            </Suspense>
+          )}
+
           {/* EL-WF-006·009 공유·소유자 액션 (클라이언트) */}
           <CardActions id={wf.id} isOwner={isOwner} isPublic={wf.is_public} hidden={wf.hidden} />
 
           {/* EL-WF-007 CTA — 소유자는 UTM 없이(자기 유입은 확산이 아니다, PRD-15 §UTM) */}
           <Link
-            href={isOwner ? "/" : "/?utm_source=card&utm_medium=share"}
+            href={isOwner ? "/create" : "/create?utm_source=card&utm_medium=share"}
             className={`${buttonVariants({ size: "lg" })} mt-8 h-11 w-full px-6 sm:w-auto`}
           >
             {isOwner ? "카드 하나 더 만들기" : "나도 내 워크플로우 카드 만들기"}
@@ -229,6 +279,21 @@ export default async function CardDetailPage({ params }: Params) {
         <section className="mt-14">
           <h2 className="text-lg font-semibold tracking-[-0.015em]">상황</h2>
           <p className="mt-3 max-w-[62ch] whitespace-pre-wrap text-base leading-[1.75]">{wf.situation}</p>
+        </section>
+      )}
+
+      <DetailSections wf={wf} sections={DETAIL_SECTIONS} />
+
+      {/* EL-WF-014 추천 프롬프트 — 워크플로우당 1개, 단계 흐름을 한 번에 실행하는 지시. 복사만 (BR-032) */}
+      {wf.prompt && (
+        <section className="mt-12">
+          <h2 className="text-lg font-semibold tracking-[-0.015em]">추천 프롬프트</h2>
+          <div className="mt-3 max-w-[62ch] rounded-lg border border-border bg-muted/50">
+            <pre id="wf-prompt" className="overflow-x-auto whitespace-pre-wrap px-4 py-3 font-sans text-sm leading-[1.75]">{wf.prompt}</pre>
+            <div className="flex justify-end border-t border-border px-2 py-1.5">
+              <PromptCopy id={wf.id} text={wf.prompt} />
+            </div>
+          </div>
         </section>
       )}
 
@@ -260,7 +325,24 @@ export default async function CardDetailPage({ params }: Params) {
           </p>
         )}
       </section>
+
+      <DetailSections wf={wf} sections={DETAIL_SECTIONS_AFTER} />
     </main>
+  );
+}
+
+// 상세 템플릿 섹션 — 값 있는 것만 (BR-028). 비어 있는 기존 카드는 1.0과 같은 화면 (REQ-WF-011 AC-2)
+function DetailSections({ wf, sections }: { wf: Row; sections: readonly { key: keyof Row; title: string; note?: string }[] }) {
+  return sections.map(({ key, title, note }) =>
+    wf[key] ? (
+      <section key={key} className="mt-12">
+        <h2 className="text-lg font-semibold tracking-[-0.015em]">
+          {title}
+          {note && <span className="ml-2 text-xs font-normal text-muted-foreground">· {note}</span>}
+        </h2>
+        <p className="mt-3 max-w-[62ch] whitespace-pre-wrap text-base leading-[1.75]">{String(wf[key])}</p>
+      </section>
+    ) : null,
   );
 }
 

@@ -4,7 +4,7 @@ import { Slot } from "radix-ui"
 
 import { cn } from "@/lib/utils"
 
-const buttonVariants = cva(
+const buttonCva = cva(
   "group/button inline-flex shrink-0 items-center justify-center rounded-lg border border-transparent bg-clip-padding text-sm font-medium whitespace-nowrap transition-all outline-none select-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 active:not-aria-[haspopup]:translate-y-px disabled:pointer-events-none disabled:opacity-50 aria-disabled:cursor-not-allowed aria-disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-3 aria-invalid:ring-destructive/20 dark:aria-invalid:border-destructive/50 dark:aria-invalid:ring-destructive/40 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
   {
     variants: {
@@ -43,6 +43,10 @@ const buttonVariants = cva(
   }
 )
 
+// 링크 등에 직접 쓰는 경우에도 충돌 클래스(border-transparent vs outline의 border-border)를 병합한다.
+// cva 원본을 그대로 내보내면 CSS 순서상 transparent가 이겨 outline 테두리가 사라졌다 (2026-11-23 랜딩 실측)
+const buttonVariants = (...args: Parameters<typeof buttonCva>) => cn(buttonCva(...args))
+
 function Button({
   className,
   variant = "default",
@@ -50,7 +54,7 @@ function Button({
   asChild = false,
   ...props
 }: React.ComponentProps<"button"> &
-  VariantProps<typeof buttonVariants> & {
+  VariantProps<typeof buttonCva> & {
     asChild?: boolean
   }) {
   const Comp = asChild ? Slot.Root : "button"

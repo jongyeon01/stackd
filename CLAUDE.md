@@ -8,12 +8,12 @@
 ## 프로젝트 개요
 
 - 3주 출시 프로젝트 — **Stackd(스택드, stackd.kr)**: **AI 워크플로우 카드** — 내 Agentic workflow(상황+단계+도구)를 카드+상세 페이지로 만들어 공유하고 갤러리에서 예시를 본다 (한국어 UI, 저장부터 GitHub 로그인, Supabase). 상세: `docs/day3-mvp-spec.md` (v2, 8/16 재판정) · `docs/day1-decisions.md`
-- 일정: Day 1 = 2026-08-12(수) / **Day 20 런칭·게시 = 2026-09-10(목)** (배포는 9/8 선행 완료), 판정일 9/24(목) → 보류·연장 10/12 → 규칙상 중단이나 사용자 결정으로 계속 → **2차 판정(11/23) 외부 작성자 0명 — 1.0 중단(유지 모드), 2.0은 별도 가설로 기준 고정 후 착수** (`docs/kill-criteria-verdict.md`). Day 6 = 8/23(일), 버퍼 2일 = 9/4~9/5. *(8/22 버퍼 소진 2 — 지렛대 0 누적 3일 흡수, 런칭일 불변. 매핑표는 `docs/PLAN.md` §일정 매핑)*
+- 일정: Day 1 = 2026-08-12(수) / **Day 20 런칭·게시 = 2026-09-10(목)** (배포는 9/8 선행 완료), 판정일 9/24(목) → 보류·연장 10/12 → 규칙상 중단이나 사용자 결정으로 계속 → **2차 판정(11/23) 외부 작성자 0명 — 1.0 중단(유지 모드), 2.0은 별도 가설 — 개발 11/24~12/13, 판정 2026-12-28(월) 외부 저장·복제자 3명** (`docs/kill-criteria-verdict.md`). Day 6 = 8/23(일), 버퍼 2일 = 9/4~9/5. *(8/22 버퍼 소진 2 — 지렛대 0 누적 3일 흡수, 런칭일 불변. 매핑표는 `docs/PLAN.md` §일정 매핑)*
 - 월 고정비 상한: **4만원/월** (도메인+DB+호스팅 합산)
 
 ## 기술 스택
 
-- Next.js(App Router) / TypeScript / Tailwind v4 / **shadcn/ui**(radix-nova, 라이트 단일) / sonner / embla-carousel+wheel-gestures(홈 캐러셀) / cmdk(도구 검색) / GSAP(Day 12~13) / **Supabase**(Auth GitHub OAuth·Postgres·RLS) / html-to-image(PNG 저장, 동적 import) / GA4(gtag 직접) / Clarity(세션 리플레이)
+- Next.js(App Router) / TypeScript / Tailwind v4 / **shadcn/ui**(radix-nova, 라이트 단일) / sonner / cmdk(도구 검색) / GSAP(Day 12~13) / **Supabase**(Auth GitHub OAuth·Postgres·RLS) / html-to-image(PNG 저장, 동적 import) / GA4(gtag 직접) / Clarity(세션 리플레이)
 
 ## 개발 명령어
 
@@ -53,8 +53,8 @@
 
 ## 프로젝트 트리
 
-- `app/` 라우터(src 없음) · `app/auth/`(callback·로그인 서버 액션) · `app/actions/`(서버 액션) · `app/card/`·`app/card-detail/[id]/`(SCR-003·004) · `app/me/`(SCR-007) · `app/settings/`(SCR-008) · `app/workflows/`(SCR-006) · `app/privacy/`·`app/terms/`(SCR-005) · `app/not-found.tsx`·`app/robots.ts`·`app/sitemap.ts`·`app/opengraph-image.tsx`·`app/api/og/`(정적 기본 OG + 카드 동적 OG)
-- `components/`(site-header·site-footer·feedback-dialog·analytics·login-event · **workflow-card**(4화면 공용 카드, 560×700 고정) · **workflow-builder**·**tool-picker**(SCR-001) · card-preview·card-actions(SCR-003·004) · my-card-actions(SCR-007) · settings-forms(SCR-008) · mobile-nav(lg 미만 햄버거 시트) · hero-intro(홈 히어로 GSAP 셸)·card-transition(카드 morph 페어링, Day 12) · json-ld(구조화 데이터 렌더러 — script 안쪽이라 < 이스케이프 필수)) · `components/ui/`(shadcn)
+- `app/` 라우터(src 없음) · `app/auth/`(callback·로그인 서버 액션) · `app/actions/`(서버 액션) · `app/create/`(SCR-001 빌더, 2.0) · `app/card/`·`app/card-detail/[id]/`(SCR-003·004) · `app/me/`(SCR-007) · `app/settings/`(SCR-008) · `app/workflows/`(SCR-006) · `app/privacy/`·`app/terms/`(SCR-005) · `app/not-found.tsx`·`app/robots.ts`·`app/sitemap.ts`·`app/opengraph-image.tsx`·`app/api/og/`(정적 기본 OG + 카드 동적 OG)
+- `components/`(site-header·site-footer·feedback-dialog·analytics·login-event · **workflow-card**(4화면 공용 카드, 560×700 고정) · **workflow-builder**·**tool-picker**(SCR-001) · card-preview·card-actions(SCR-003·004) · my-card-actions(SCR-007) · settings-forms(SCR-008) · mobile-nav(lg 미만 햄버거 시트) · **workflow-list-card**·workflow-search(2.0 목록 카드·검색 폼·주제 칩) · workflow-engage·prompt-copy(2.0 복제·저장·프롬프트 복사) · card-transition(카드 morph 페어링, Day 12) · json-ld(구조화 데이터 렌더러 — script 안쪽이라 < 이스케이프 필수)) · `components/ui/`(shadcn)
 - `lib/supabase/`(server·admin) · `lib/site.ts`(절대 URL·사이트명·설명 SSOT + **BASE_OG** — 하위가 openGraph를 선언하면 상위가 교체되므로 선언 3곳이 스프레드로 깐다) · `lib/limits.ts`(BR 제한 유틸+검증 함수+테스트) · `lib/paginate.ts`(라이브러리 페이지네이션+테스트) · `lib/admin.ts`(admin 게이트 BR-022+테스트) · `lib/og.tsx`(OG 공용 팔레트·기본 이미지) · `lib/draft.ts`(초안 localStorage+테스트) · `lib/hero-card.ts`(0번 카드 데이터) · `lib/analytics.ts`(GA4 track, EVT 7종) · `lib/utils.ts`(cn)
 - `proxy.ts`(세션 갱신, Next 16) · `supabase/schema.sql` · `data/catalog.json` · `.env.example`
 - 테스트: `npm test` (`node --test`, 도메인 로직만) · `npm run e2e` (playwright, 핵심 플로우 1개 — 대상은 `E2E_BASE_URL`, 기본 localhost)

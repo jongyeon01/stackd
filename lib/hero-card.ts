@@ -58,4 +58,11 @@ export const HERO_CARD: WorkflowInput = {
   role: "1인 개발자",
   accent: "ink",
   is_public: true,
+  // 2.0 — DB 934c9228과 같은 주제(OQ-015). 상세 템플릿은 카드에 안 나와 비워 둔다 (BR-028)
+  topic: "build",
+  expected_result: "",
+  prerequisites: "",
+  caveats: "",
+  tested_env: "",
+  prompt: "",
 };

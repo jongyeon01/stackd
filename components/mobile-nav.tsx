@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { NAV } from "@/lib/site";
 import { MenuIcon } from "lucide-react";
 import { signOut } from "@/app/auth/actions";
 import { Button } from "@/components/ui/button";
@@ -36,15 +37,14 @@ export default function MobileNav({ handle }: { handle?: string }) {
         </SheetHeader>
 
         <nav aria-label="모바일 주요" className="mt-8 flex flex-col">
-          <Link href="/workflows" onClick={close} className={item}>
-            라이브러리
-          </Link>
+          {NAV.filter((n) => !n.auth || handle).map((n) => (
+            <Link key={n.href} href={n.href} onClick={close} className={item}>
+              {n.label}
+            </Link>
+          ))}
 
           {handle && (
             <>
-              <Link href="/me" onClick={close} className={item}>
-                내 카드
-              </Link>
               <Link href="/settings" onClick={close} className={item}>
                 설정
               </Link>
