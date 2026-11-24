@@ -91,6 +91,7 @@ alter table public.workflows add column if not exists expected_result text;  -- 
 alter table public.workflows add column if not exists prerequisites   text;  -- 0~500
 alter table public.workflows add column if not exists caveats         text;  -- 0~500
 alter table public.workflows add column if not exists tested_env      text;  -- 0~200, 작성자 자기 신고
+alter table public.workflows add column if not exists prompt          text;  -- 0~2000, 워크플로우당 추천 프롬프트 1개 (2026-11-24)
 alter table public.workflows add column if not exists forked_from     text
   references public.workflows(id) on delete set null;                    -- 2.0 판정 측정 대상
 
