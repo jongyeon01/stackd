@@ -91,11 +91,7 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ e
       <section aria-labelledby="hero-title" className="overflow-hidden">
         <div className="container-page grid items-center gap-12 py-14 sm:py-20 lg:grid-cols-[minmax(0,1fr)_auto] lg:gap-10">
           <div>
-            <p className={`${EYEBROW} flex items-center gap-2`}>
-              <span aria-hidden className="size-1.5 rounded-full bg-primary" />
-              Discover better workflows
-            </p>
-            <h1 id="hero-title" className="mt-5 text-[2.5rem] leading-[1.2] tracking-[-0.02em] sm:text-5xl lg:text-[3.5rem]">
+            <h1 id="hero-title" className="text-[2.5rem] leading-[1.2] tracking-[-0.02em] sm:text-5xl lg:text-[3.5rem]">
               AI 도구는 많은데,
               <br />
               <span className="text-primary">어떻게 조합해야</span>
