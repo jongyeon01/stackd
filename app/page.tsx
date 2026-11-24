@@ -150,7 +150,7 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ e
                 모든 워크플로우 <ArrowUpRight aria-hidden className="size-4" />
               </Link>
             </div>
-            <ul className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            <ul className="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
               {latest.map((w, i) => (
                 <li key={w.id}>
                   <WorkflowListCard w={w} index={i} headingAs="h3" />
