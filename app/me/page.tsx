@@ -108,7 +108,7 @@ export default async function MePage({ searchParams }: { searchParams: Promise<{
 // 공통 틀 — h1·설정 링크·탭 (EL-ME-001·002·011)
 function Shell({ tab, children }: { tab: "mine" | "saved"; children: React.ReactNode }) {
   return (
-    <main className="mx-auto w-full max-w-5xl flex-1 px-4 py-10 sm:px-6 lg:px-8 lg:py-14">
+    <main className="container-page flex-1 py-10 lg:py-14">
       <div className="flex flex-wrap items-baseline justify-between gap-4">
         {/* EL-ME-001 페이지 유일 h1 (CPY-ME-001) */}
         <h1 className="text-2xl font-semibold tracking-[-0.015em] sm:text-3xl">내 보관함</h1>
@@ -159,7 +159,7 @@ async function SavedTab({ userId }: { userId: string }) {
           <Link href="/workflows" className={buttonVariants({ size: "lg" })}>워크플로우 탐색하기</Link>
         </div>
       ) : (
-        <ul className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <ul className="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {rows.map(({ id, w }, i) => (
             <li key={id} className="grid gap-3">
               {/* 대상이 비공개·hidden이 됐으면 내용 대신 안내 (EL-ME-013 · CPY-ME-009) — 소유자 본인 것은 보이지만 저장 대상이 아니다 */}

@@ -91,12 +91,13 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ e
       <section aria-labelledby="hero-title" className="overflow-hidden">
         <div className="container-page grid items-center gap-12 py-14 sm:py-20 lg:grid-cols-[minmax(0,1fr)_auto] lg:gap-10">
           <div>
-            <h1 id="hero-title" className="text-[2.5rem] leading-[1.2] tracking-[-0.02em] sm:text-5xl lg:text-[3.5rem]">
+            {/* 3행 한 줄 유지: 모바일 vw 축소, 상한 48px */}
+            <h1 id="hero-title" className="text-[min(3rem,8.5vw)] leading-[1.2] tracking-[-0.02em]">
               AI 도구는 많은데,
               <br />
-              <span className="text-primary">어떻게 조합해야</span>
+              <span className="text-primary">어떻게 조합하고</span>
               <br />
-              할지 모르겠다면.
+              활용해야 할지 모르겠다면.
             </h1>
             <p className="mt-6 max-w-[46ch] text-lg leading-[1.75] text-muted-foreground">
               다른 개발자들은 어떤 도구를, 어떤 순서로 사용할까요? 실제 AI 워크플로우를 발견하고 내 작업 방식으로 만들어 보세요.
@@ -112,7 +113,8 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ e
           </div>
 
           {/* 0번 카드 — 겹친 판 위에 살짝 기울여 "카드 묶음"으로 (시안 구성, 복제 링크는 2026-11-23 사용자 요청으로 제거) */}
-          <div aria-label="예시 워크플로우 카드" role="group" className="relative mx-auto [--s:0.56] sm:[--s:0.66] lg:[--s:0.7]">
+          {/* lg mr: 6° 뒤판 돌출분(560×700 기준 35px×s)만큼 당겨 콘텐츠 끝선에 맞춤 */}
+          <div aria-label="예시 워크플로우 카드" role="group" className="relative mx-auto [--s:0.56] sm:[--s:0.66] lg:[--s:0.7] lg:mr-[calc(35px*var(--s))]">
             <div aria-hidden className="absolute inset-x-0 top-0 h-[calc(700px*var(--s))] -rotate-6 rounded-xl border border-border bg-muted" />
             <div className="relative rotate-2 overflow-hidden rounded-xl shadow-[0_24px_48px_-24px_rgba(17,20,25,0.35)]">
               <div className="h-[calc(700px*var(--s))] w-[calc(560px*var(--s))] overflow-hidden">
@@ -148,7 +150,7 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ e
                 모든 워크플로우 <ArrowUpRight aria-hidden className="size-4" />
               </Link>
             </div>
-            <ul className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            <ul className="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
               {latest.map((w, i) => (
                 <li key={w.id}>
                   <WorkflowListCard w={w} index={i} headingAs="h3" />

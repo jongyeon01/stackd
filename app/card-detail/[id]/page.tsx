@@ -121,7 +121,7 @@ export default async function CardDetailPage({ params }: Params) {
   // hidden은 404가 아니라 블러 — 타인에게는 내용을 렌더하지 않는다 (BR-018, EL-WF-011)
   if (wf.hidden && !isOwner) {
     return (
-      <main className="mx-auto w-full max-w-5xl flex-1 px-4 py-10 sm:px-6 lg:px-8 lg:py-14">
+      <main className="container-page flex-1 py-10 lg:py-14">
         <h1 className="text-2xl font-semibold tracking-[-0.015em]">숨겨진 워크플로우</h1>
         <div
           aria-hidden
@@ -138,7 +138,7 @@ export default async function CardDetailPage({ params }: Params) {
   }
 
   return (
-    <main className="mx-auto w-full max-w-5xl flex-1 px-4 py-10 sm:px-6 lg:px-8 lg:py-14">
+    <main className="container-page flex-1 py-10 lg:py-14">
       {/* 색인 대상일 때만 구조화 데이터 — noindex 카드에 내보내면 메타와 모순 (BR-017·018) */}
       {wf.is_public && !wf.hidden && (
         <>
