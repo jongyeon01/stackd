@@ -119,6 +119,17 @@
   }
 }
 
+/* 히어로 텍스트 마스크 리빌 (ANIMATION.md #7) — 부모 overflow-hidden 창 안에서 아래→위, enter 이징 */
+@keyframes mask-up {
+  from { transform: translateY(100%); }
+}
+@keyframes fade-up {
+  from { transform: translateY(16px); opacity: 0; }
+}
+/* 지연은 --delay로 받는다 — animation 단축 속성이 유틸리티 animation-delay를 덮어쓰므로 */
+.mask-up { animation: mask-up 0.8s cubic-bezier(0.215, 0.61, 0.355, 1) var(--delay, 0ms) both; }
+.fade-up { animation: fade-up 0.6s cubic-bezier(0.215, 0.61, 0.355, 1) var(--delay, 0ms) both; }
+
 /* 모션은 상태 전이만 — 그것도 끄고 싶다는 사용자는 끈다 */
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
@@ -126,6 +137,11 @@
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
+  }
+  /* 전역 규칙은 지연을 남겨 both 채움으로 텍스트가 숨는다 — 히어로 리빌은 아예 끈다 */
+  .mask-up,
+  .fade-up {
+    animation: none !important;
   }
   /* ::view-transition-*는 * 셀렉터 밖 — 명시로 끈다 (ANIMATION.md) */
   ::view-transition-group(*),
