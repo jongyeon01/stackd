@@ -95,15 +95,24 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ e
         <div className="container-page pt-14 pb-6 sm:pt-20">
           <div className="text-center">
             {/* 2행 전체 액센트 — 좁은 화면은 keep-all로 어절 단위 줄바꿈 */}
+            {/* 마스크 리빌(ANIMATION.md #7): 줄마다 overflow-hidden 창 안에서 아래→위 */}
             <h1 id="hero-title" className="text-[min(3.5rem,8.5vw)] leading-[1.2] tracking-[-0.02em]">
-              AI 도구는 많은데,
-              <br />
-              <span className="text-primary">어떻게 조합하고 활용해야 할지 모르겠다면.</span>
+              <span className="block overflow-hidden">
+                <span className="mask-up block">AI 도구는 많은데,</span>
+              </span>
+              <span className="block overflow-hidden">
+                <span className="mask-up block text-primary [--delay:100ms]">
+                  어떻게 조합하고 활용해야 할지 모르겠다면.
+                </span>
+              </span>
             </h1>
-            <p className="mx-auto mt-6 max-w-[46ch] text-lg leading-[1.75] text-muted-foreground">
-              다른 개발자들은 어떤 도구를, 어떤 순서로 사용할까요? 실제 AI 워크플로우를 발견하고 내 작업 방식으로 만들어 보세요.
-            </p>
-            <div className="mt-8 flex flex-wrap justify-center gap-3">
+            <div className="mx-auto mt-6 max-w-[46ch] overflow-hidden">
+              <p className="mask-up text-lg leading-[1.75] text-muted-foreground [--delay:250ms]">
+                다른 개발자들은 어떤 도구를, 어떤 순서로 사용할까요? 실제 AI 워크플로우를 발견하고 내 작업 방식으로 만들어 보세요.
+              </p>
+            </div>
+            {/* CTA는 마스크 없이 fade-up — 버튼 테두리·포커스 링이 잘리지 않게 */}
+            <div className="fade-up mt-8 flex flex-wrap justify-center gap-3 [--delay:400ms]">
               <Link href="/workflows" className={buttonVariants({ size: "lg", className: "h-12 px-6 text-base" })}>
                 워크플로우 탐색하기 <ArrowUpRight aria-hidden />
               </Link>
