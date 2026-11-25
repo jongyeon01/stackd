@@ -3,15 +3,8 @@
 import { useState, useTransition } from "react";
 import { toast } from "sonner";
 import { deleteAccount } from "@/app/actions/account";
+import ConfirmDialog from "@/components/confirm-dialog";
 import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { matchesHandle } from "@/lib/limits";
@@ -52,51 +45,33 @@ export function DeleteAccountForm({ handle }: { handle: string }) {
       </Button>
 
       {/* 확인 입력이 핸들과 같을 때만 실행 버튼이 열린다 (BR-020 · §7) */}
-      <Dialog open={open} onOpenChange={toggle}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>탈퇴하기</DialogTitle>
-            <DialogDescription>
-              계정과 만든 카드가 모두 삭제되며 되돌릴 수 없어요.
-            </DialogDescription>
-          </DialogHeader>
-
-          <div className="grid gap-2">
-            <Label htmlFor="delete-confirm" className="font-normal text-sm leading-[1.75]">
-              확인을 위해 <span className="font-mono">{handle}</span> 를 입력해주세요
-            </Label>
-            <Input
-              id="delete-confirm"
-              value={confirm}
-              onChange={(e) => setConfirm(e.target.value)}
-              autoComplete="off"
-              aria-describedby="delete-confirm-hint"
-            />
-            <p id="delete-confirm-hint" className="text-sm leading-[1.75] text-muted-foreground">
-              핸들이 일치해야 탈퇴 버튼이 열려요.
-            </p>
-          </div>
-
-          <DialogFooter>
-            <Button
-              variant="outline"
-              onClick={() => toggle(false)}
-              disabled={pending}
-              className="h-11 px-5"
-            >
-              취소
-            </Button>
-            <Button
-              variant="destructive"
-              onClick={remove}
-              disabled={!matched || pending}
-              className="h-11 px-5"
-            >
-              탈퇴
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      <ConfirmDialog
+        open={open}
+        onOpenChange={toggle}
+        title="탈퇴하기"
+        description="계정과 만든 카드가 모두 삭제되며 되돌릴 수 없어요."
+        confirmLabel="탈퇴"
+        onConfirm={remove}
+        pending={pending}
+        confirmDisabled={!matched}
+        destructive
+      >
+        <div className="grid gap-2">
+          <Label htmlFor="delete-confirm" className="font-normal text-sm leading-[1.75]">
+            확인을 위해 <span className="font-mono">{handle}</span> 를 입력해주세요
+          </Label>
+          <Input
+            id="delete-confirm"
+            value={confirm}
+            onChange={(e) => setConfirm(e.target.value)}
+            autoComplete="off"
+            aria-describedby="delete-confirm-hint"
+          />
+          <p id="delete-confirm-hint" className="text-sm leading-[1.75] text-muted-foreground">
+            핸들이 일치해야 탈퇴 버튼이 열려요.
+          </p>
+        </div>
+      </ConfirmDialog>
     </>
   );
 }
