@@ -297,22 +297,36 @@ export default async function CardDetailPage({ params }: Params) {
       {/* EL-WF-004 단계별 설명 — 카드에서 잘린 메모 전문이 여기 있다 */}
       <section className="mt-12">
         <h2 className="text-lg font-semibold tracking-[-0.015em]">단계별 설명</h2>
-        <ol className="mt-4 space-y-8">
+        {/* 시그니처 단계 레일 — 카드와 같은 조형 (DESIGN.md §시그니처) */}
+        <ol className="mt-6 space-y-8">
           {wf.steps.map((s, i) => (
-            <li key={`${s.tool.name}-${i}`} className="max-w-[62ch]">
-              <p className="font-mono text-sm font-medium">
-                {String(i + 1).padStart(2, "0")} <StepToolName name={s.tool.name} link={links[i]} />
-                {s.tool.custom && (
-                  <span className="ml-2 rounded-sm bg-muted px-1.5 py-0.5 align-middle font-mono text-xs font-medium text-muted-foreground">
-                    custom
-                  </span>
-                )}
-                <span className="ml-2 font-sans text-xs font-normal text-muted-foreground">{s.tool.category}</span>
-              </p>
-              <p className="mt-1 text-base leading-[1.75]">{s.note}</p>
-              {s.detail && (
-                <p className="mt-2 whitespace-pre-wrap text-sm leading-[1.75] text-muted-foreground">{s.detail}</p>
+            <li key={`${s.tool.name}-${i}`} className="relative flex max-w-[62ch] gap-4">
+              {/* 다음 노드까지 잇는 선 — 노드 아래에서 간격(space-y-8)을 건너 다음 항목 위까지 */}
+              {i < wf.steps.length - 1 && (
+                <span aria-hidden className="absolute left-3 top-6 -bottom-8 w-px bg-border" />
               )}
+              <span
+                aria-hidden
+                className="relative z-10 flex size-6 shrink-0 items-center justify-center rounded-full bg-foreground font-mono text-[0.625rem] font-medium leading-none text-background"
+              >
+                {String(i + 1).padStart(2, "0")}
+              </span>
+              <div className="min-w-0 flex-1">
+                <p className="font-mono text-sm font-medium leading-6">
+                  <span className="sr-only">{i + 1}단계 </span>
+                  <StepToolName name={s.tool.name} link={links[i]} />
+                  {s.tool.custom && (
+                    <span className="ml-2 rounded-sm bg-muted px-1.5 py-0.5 align-middle font-mono text-xs font-medium text-muted-foreground">
+                      custom
+                    </span>
+                  )}
+                  <span className="ml-2 font-sans text-xs font-normal text-muted-foreground">{s.tool.category}</span>
+                </p>
+                <p className="mt-1 text-base leading-[1.75]">{s.note}</p>
+                {s.detail && (
+                  <p className="mt-2 whitespace-pre-wrap text-sm leading-[1.75] text-muted-foreground">{s.detail}</p>
+                )}
+              </div>
             </li>
           ))}
         </ol>
