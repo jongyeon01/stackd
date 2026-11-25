@@ -161,11 +161,11 @@ async function SavedTab({ userId }: { userId: string }) {
         </div>
       ) : (
         <ul className="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {rows.map(({ id, w }, i) => (
+          {rows.map(({ id, w }) => (
             <li key={id} className="grid gap-3">
               {/* 대상이 비공개·hidden이 됐으면 내용 대신 안내 (EL-ME-013 · CPY-ME-009) — 소유자 본인 것은 보이지만 저장 대상이 아니다 */}
               {w && w.is_public && !w.hidden ? (
-                <WorkflowListCard w={w} index={i} />
+                <WorkflowListCard w={w} />
               ) : (
                 <p className="rounded-xl border border-dashed border-border p-5 text-sm text-muted-foreground">지금은 볼 수 없는 워크플로우예요</p>
               )}

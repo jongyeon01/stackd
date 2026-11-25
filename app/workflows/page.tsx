@@ -135,12 +135,12 @@ export default async function WorkflowsPage({ searchParams }: { searchParams: Pr
           />
           {/* EL-LIB-002 목록 — 1열 / sm 2열 / lg 3열 (§16) · 진입 stagger는 ANIMATION.md #5 */}
           <GridStagger className="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {items.map((w, i) => (
+            {items.map((w) => (
               <li key={w.id}>
-                {/* EL-LIB-003 목록 카드 (2.0) — 항목 전체가 링크 1개, 순번은 페이지 오프셋 반영 */}
+                {/* EL-LIB-003 목록 카드 (2.0) — 항목 전체가 링크 1개 */}
                 {/* 상세로 morph (ANIMATION.md #3) */}
                 <CardTransition id={w.id}>
-                  <WorkflowListCard w={w} index={from + i} />
+                  <WorkflowListCard w={w} />
                 </CardTransition>
               </li>
             ))}

@@ -21,6 +21,8 @@ const buttonCva = cva(
         destructive:
           "bg-destructive text-white hover:bg-destructive/90 focus-visible:border-destructive focus-visible:ring-destructive/20",
         link: "text-primary underline-offset-4 hover:underline",
+        // 소프트 블루 — primary 6% 틴트, 주 CTA(default)보다 한 단계 낮은 보조 행동
+        soft: "bg-primary/6 text-primary hover:bg-primary/10",
       },
       size: {
         default:

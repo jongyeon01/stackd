@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { ArrowUpRight, ChevronDown, Copy, PenLine, Search, Share2 } from "lucide-react";
+import { ArrowUpRight, ChevronDown } from "lucide-react";
 import DraftBanner from "@/components/draft-banner";
 import JsonLd from "@/components/json-ld";
 import { buttonVariants } from "@/components/ui/button";
@@ -27,15 +27,20 @@ export const metadata: Metadata = {
 // role·accent는 히어로 좌우 WorkflowCard용
 const LIST_COLUMNS = "id, title, situation_short, steps, dev_stack, topic, author_handle, role, accent";
 
-// 사용 방법 4단계 (EL-LAND-006 · CPY-LAND-015~018) — 3번 "만들기"는 사용자 추가
+// 사용 방법 4단계 (EL-LAND-006 · CPY-LAND-015~018) — 3번 "만들기"는 사용자 추가. 번호는 레일 노드가 갖는다
 const HOW = [
-  { icon: Search, title: "01. 발견하기", body: "하고 싶은 작업을 주제로 찾고 다른 개발자들의 워크플로우를 살펴보세요." },
-  { icon: Copy, title: "02. 내 방식으로 복제하기", body: "도구와 단계를 복제한 뒤 자신의 프로젝트와 환경에 맞게 수정하세요." },
-  { icon: PenLine, title: "03. 내 워크플로우 만들기", body: "직접 쓰는 도구 조합과 순서를 단계별로 정리하세요." },
-  { icon: Share2, title: "04. 공유하기", body: "정리한 워크플로우를 링크나 이미지 카드로 다른 개발자에게 공유하세요." },
+  { title: "발견하기", body: "하고 싶은 작업을 주제로 찾고 다른 개발자들의 워크플로우를 살펴보세요." },
+  { title: "내 방식으로 복제하기", body: "도구와 단계를 복제한 뒤 자신의 프로젝트와 환경에 맞게 수정하세요." },
+  { title: "내 워크플로우 만들기", body: "직접 쓰는 도구 조합과 순서를 단계별로 정리하세요." },
+  { title: "공유하기", body: "정리한 워크플로우를 링크나 이미지 카드로 다른 개발자에게 공유하세요." },
 ];
 
-const EYEBROW = "text-xs font-semibold uppercase tracking-[0.14em] text-primary";
+// 마지막 CTA — 만들 때 실제로 적는 것과 받는 것 (값 출처: lib/limits.ts BR-011·BR-001, card-actions)
+const MAKE = [
+  { term: "상황", desc: "언제 쓰는 워크플로우인지 20자 이내 한 줄" },
+  { term: "단계", desc: "도구와 메모를 2~8단계 순서대로 — 도구는 검색해 고르거나 직접 입력" },
+  { term: "결과", desc: "공유 링크와 PNG 카드 이미지 — 저장할 때만 GitHub 로그인" },
+];
 
 // SCR-009 랜딩 — 탐색 중심 진입. 전부 서버 렌더, 클라이언트는 초안 배너뿐
 export default async function Home({ searchParams }: { searchParams: Promise<{ edit?: string }> }) {
@@ -181,8 +186,7 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ e
           <div className="container-page">
             <div className="flex flex-wrap items-end justify-between gap-4">
               <div>
-                <p className={EYEBROW}>Explore workflows</p>
-                <h2 id="latest-title" className="mt-3 text-2xl sm:text-3xl">다른 개발자들은 이렇게 사용해요.</h2>
+                <h2 id="latest-title" className="text-2xl sm:text-3xl">다른 개발자들은 이렇게 사용해요.</h2>
                 <p className="mt-2 text-muted-foreground">실제 작업에 적용할 수 있는 도구 조합과 순서를 찾아보세요.</p>
               </div>
               <Link href="/workflows" className="inline-flex items-center gap-1 py-2 text-sm font-medium underline-offset-4 hover:underline">
@@ -190,9 +194,9 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ e
               </Link>
             </div>
             <ul className="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              {latest.map((w, i) => (
+              {latest.map((w) => (
                 <li key={w.id}>
-                  <WorkflowListCard w={w} index={i} headingAs="h3" />
+                  <WorkflowListCard w={w} headingAs="h3" />
                 </li>
               ))}
             </ul>
@@ -203,15 +207,25 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ e
       {/* EL-LAND-006 사용 방법 4단계 */}
       <section aria-labelledby="how-title" className="border-t border-border py-14 sm:py-20">
         <div className="container-page">
-          <p className={EYEBROW}>How it works</p>
-          <h2 id="how-title" className="mt-3 text-2xl sm:text-3xl">발견하고, 내 방식으로 바꾸고, 만들고, 공유하세요.</h2>
-          <ol className="mt-10 grid gap-8 sm:grid-cols-2 lg:grid-cols-4 lg:gap-6">
-            {HOW.map(({ icon: Icon, title, body }) => (
-              <li key={title} className="flex gap-4 lg:flex-col">
-                <span aria-hidden className="flex size-12 shrink-0 items-center justify-center rounded-xl border border-border bg-card text-primary">
-                  <Icon className="size-5" />
+          <h2 id="how-title" className="text-2xl sm:text-3xl">발견하고, 내 방식으로 바꾸고, 만들고, 공유하세요.</h2>
+          {/* 시그니처 단계 레일 — lg 미만 세로, lg 이상 가로 (DESIGN.md §시그니처) */}
+          <ol className="mt-10 grid gap-8 lg:grid-cols-4 lg:gap-6">
+            {HOW.map(({ title, body }, i) => (
+              <li key={title} className="relative flex gap-4 lg:flex-col">
+                {/* 다음 노드까지 잇는 선 — 세로는 gap-8, 가로는 gap-6을 건넌다 */}
+                {i < HOW.length - 1 && (
+                  <span
+                    aria-hidden
+                    className="absolute left-4 top-8 -bottom-8 w-px bg-border lg:top-4 lg:bottom-auto lg:left-8 lg:-right-6 lg:h-px lg:w-auto"
+                  />
+                )}
+                <span
+                  aria-hidden
+                  className="relative z-10 flex size-8 shrink-0 items-center justify-center rounded-full bg-foreground font-mono text-xs font-medium leading-none text-background"
+                >
+                  {String(i + 1).padStart(2, "0")}
                 </span>
-                <div>
+                <div className="max-w-[62ch] pt-1 lg:pt-0">
                   <h3 className="text-base font-semibold">{title}</h3>
                   <p className="mt-1.5 text-sm leading-[1.75] text-muted-foreground">{body}</p>
                 </div>
@@ -221,14 +235,24 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ e
         </div>
       </section>
 
-      {/* EL-LAND-007 마지막 CTA */}
+      {/* EL-LAND-007 마지막 CTA — 무엇을 적고 무엇을 받는지 (좌측 축, DESIGN.md §정렬) */}
       <section aria-labelledby="cta-title" className="border-t border-border bg-card py-16 sm:py-20">
-        <div className="container-page grid justify-items-center gap-3 text-center">
-          <h2 id="cta-title" className="text-2xl sm:text-3xl">당신의 작업 방식도 누군가에게 도움이 됩니다.</h2>
-          <p className="text-muted-foreground">자신만의 AI 워크플로우를 카드 한 장으로 정리해 보세요.</p>
-          <Link href="/create" className={buttonVariants({ size: "lg", className: "mt-5 h-12 px-6 text-base" })}>
-            내 워크플로우 만들기 <ArrowUpRight aria-hidden />
-          </Link>
+        <div className="container-page grid gap-10 lg:grid-cols-2 lg:gap-16">
+          <div>
+            <h2 id="cta-title" className="text-2xl sm:text-3xl">쓰고 있는 도구를 순서대로 적으면 카드 한 장이 됩니다.</h2>
+            <p className="mt-3 text-muted-foreground">카드 한 장까지 2분이면 충분해요.</p>
+            <Link href="/create" className={buttonVariants({ size: "lg", className: "mt-8 h-12 px-6 text-base" })}>
+              내 워크플로우 만들기 <ArrowUpRight aria-hidden />
+            </Link>
+          </div>
+          <dl className="grid content-start gap-5">
+            {MAKE.map(({ term, desc }) => (
+              <div key={term} className="grid gap-1 border-t border-border pt-5 sm:grid-cols-[5rem_1fr] sm:gap-4">
+                <dt className="text-sm font-semibold">{term}</dt>
+                <dd className="text-sm leading-[1.75] text-muted-foreground">{desc}</dd>
+              </div>
+            ))}
+          </dl>
         </div>
       </section>
     </main>
