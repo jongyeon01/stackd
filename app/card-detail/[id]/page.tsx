@@ -221,7 +221,7 @@ export default async function CardDetailPage({ params }: Params) {
               href={`https://github.com/${wf.author_handle}`}
               target="_blank"
               rel="noopener noreferrer"
-              className="font-mono text-sm underline underline-offset-4"
+              className="font-mono text-sm underline decoration-muted-foreground/40 underline-offset-4 transition-colors hover:decoration-foreground"
             >
               @{wf.author_handle}
             </a>
@@ -232,7 +232,7 @@ export default async function CardDetailPage({ params }: Params) {
           {wf.forked_from && (
             <p className="mt-3 text-sm text-muted-foreground">
               {origin ? (
-                <>원본: <Link href={`/card-detail/${origin.id}`} className="underline underline-offset-4">{origin.title} — @{origin.author_handle}</Link></>
+                <>원본: <Link href={`/card-detail/${origin.id}`} className="underline decoration-muted-foreground/40 underline-offset-4 transition-colors hover:decoration-foreground">{origin.title} — @{origin.author_handle}</Link></>
               ) : (
                 "원본을 볼 수 없어요"
               )}

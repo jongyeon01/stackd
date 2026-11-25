@@ -72,7 +72,7 @@ export default function TermsPage() {
         <p className="mt-3 leading-[1.75]">
           이용자는 자신이 작성한 카드를 언제든지 삭제할 수 있습니다. 탈퇴하면 계정과 작성한 카드가 모두 삭제되며{" "}
           <strong className="font-medium">복구할 수 없습니다.</strong> 처리 내용은{" "}
-          <Link href="/privacy" className="underline underline-offset-4">
+          <Link href="/privacy" className="underline decoration-muted-foreground/40 underline-offset-4 transition-colors hover:decoration-foreground">
             개인정보처리방침
           </Link>
           을 따릅니다.
@@ -86,7 +86,7 @@ export default function TermsPage() {
 
         {/* EL-LEGAL-004 상호 링크 */}
         <p className="mt-12 border-t border-border pt-6 leading-[1.75]">
-          <Link href="/privacy" className="inline-block py-2.5 underline underline-offset-4">
+          <Link href="/privacy" className="inline-block py-2.5 underline decoration-muted-foreground/40 underline-offset-4 transition-colors hover:decoration-foreground">
             개인정보처리방침 보기
           </Link>
         </p>

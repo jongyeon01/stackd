@@ -88,7 +88,7 @@ export default function PrivacyPage() {
         </p>
         <p className="mt-3 leading-[1.75]">
           탈퇴는{" "}
-          <Link href="/settings" className="underline underline-offset-4">
+          <Link href="/settings" className="underline decoration-muted-foreground/40 underline-offset-4 transition-colors hover:decoration-foreground">
             설정
           </Link>
           에서 진행할 수 있습니다.
@@ -163,7 +163,7 @@ export default function PrivacyPage() {
 
         {/* EL-LEGAL-004 상호 링크 */}
         <p className="mt-12 border-t border-border pt-6 leading-[1.75]">
-          <Link href="/terms" className="inline-block py-2.5 underline underline-offset-4">
+          <Link href="/terms" className="inline-block py-2.5 underline decoration-muted-foreground/40 underline-offset-4 transition-colors hover:decoration-foreground">
             이용약관 보기
           </Link>
         </p>

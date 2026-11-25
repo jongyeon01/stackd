@@ -74,7 +74,8 @@ export default async function MePage({ searchParams }: { searchParams: Promise<{
           {rows.map((w) => (
             <li key={w.id}>
               <Card className="gap-0 p-4 sm:p-5">
-                <Link href={`/card-detail/${w.id}`}>
+                {/* hover 피드백 — 썸네일 전체가 링크 */}
+                <Link href={`/card-detail/${w.id}`} className="block transition-opacity hover:opacity-85">
                   {/* 조판은 560×700 고정, 목록에서는 scale로만 축소 (DESIGN.md §카드 조판) */}
                   {/* 상세로 morph (ANIMATION.md #3) */}
                   <CardTransition id={w.id}>
@@ -113,7 +114,7 @@ function Shell({ tab, children }: { tab: "mine" | "saved"; children: React.React
         {/* EL-ME-001 페이지 유일 h1 (CPY-ME-001) */}
         <h1 className="text-2xl font-semibold tracking-[-0.015em] sm:text-3xl">내 보관함</h1>
         {/* EL-ME-002 — 헤더와 중복이나 로그아웃·탈퇴를 찾는 동선용 */}
-        <Link href="/settings" className="py-2.5 text-sm leading-[1.75] text-muted-foreground underline underline-offset-4">
+        <Link href="/settings" className="py-2.5 text-sm leading-[1.75] text-muted-foreground underline underline-offset-4 transition-colors hover:text-foreground">
           설정
         </Link>
       </div>
