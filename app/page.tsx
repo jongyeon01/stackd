@@ -129,10 +129,10 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ e
               <div
                 key={w.id}
                 aria-hidden
-                className={`absolute top-[calc(56px*var(--s))] hidden lg:block ${
+                className={`card-fan absolute top-[calc(56px*var(--s))] hidden [--delay:600ms] lg:block ${
                   i === 0
-                    ? "right-[calc(50%+190px*var(--s))] origin-bottom-right -rotate-[8deg]"
-                    : "left-[calc(50%+190px*var(--s))] origin-bottom-left rotate-[8deg]"
+                    ? "right-[calc(50%+190px*var(--s))] origin-bottom-right -rotate-[8deg] [--from-x:64px]"
+                    : "left-[calc(50%+190px*var(--s))] origin-bottom-left rotate-[8deg] [--from-x:-64px]"
                 }`}
               >
                 <div className="h-[calc(630px*var(--s))] w-[calc(504px*var(--s))] overflow-hidden rounded-xl">
@@ -147,7 +147,7 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ e
             <div
               aria-label="예시 워크플로우 카드"
               role="group"
-              className="relative z-10 mx-auto h-[calc(700px*var(--s))] w-[calc(560px*var(--s))] overflow-hidden rounded-xl shadow-[0_24px_48px_-24px_rgba(17,20,25,0.35)]"
+              className="card-rise relative z-10 mx-auto h-[calc(700px*var(--s))] [--delay:450ms] w-[calc(560px*var(--s))] overflow-hidden rounded-xl shadow-[0_24px_48px_-24px_rgba(17,20,25,0.35)]"
             >
               <div className="origin-top-left [transform:scale(var(--s))]">
                 <WorkflowCard workflow={HERO_CARD} handle="kjjyyy01" className="shadow-none" />
