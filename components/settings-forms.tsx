@@ -4,12 +4,27 @@ import { useState, useTransition } from "react";
 import { toast } from "sonner";
 import { deleteAccount } from "@/app/actions/account";
 import ConfirmDialog from "@/components/confirm-dialog";
+import LogoutDialog from "@/components/logout-dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { matchesHandle } from "@/lib/limits";
 
 const DELETE_FAIL = "탈퇴 처리에 실패했어요 — 잠시 후 다시 시도해주세요"; // CPY-SET-004 · ERR-SET-001
+
+// EL-SET-004 — 로그아웃. 버튼 → 확인 dialog → signOut (2026-11-25 사용자 결정)
+export function LogoutForm() {
+  const [open, setOpen] = useState(false);
+
+  return (
+    <>
+      <Button variant="outline" onClick={() => setOpen(true)} className="h-11 w-fit px-5">
+        로그아웃
+      </Button>
+      <LogoutDialog open={open} onOpenChange={setOpen} />
+    </>
+  );
+}
 
 // EL-SET-005 — 탈퇴 (REQ-SET-004). 페이지에는 버튼만, 확인 입력은 dialog 안에서 받는다
 // (2026-08-28 사용자 결정 — 파괴적 행동을 한 단계 뒤로 미룬다)
