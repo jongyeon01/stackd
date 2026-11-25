@@ -73,9 +73,9 @@ export default async function MePage({ searchParams }: { searchParams: Promise<{
         <ul className="mt-10 grid gap-8 md:grid-cols-2">
           {rows.map((w) => (
             <li key={w.id}>
-              <Card className="gap-0 p-4 sm:p-5">
-                {/* hover 피드백 — 썸네일 전체가 링크 */}
-                <Link href={`/card-detail/${w.id}`} className="block transition-opacity hover:opacity-85">
+              {/* hover 시 외곽선 강조 — 저장 탭 목록 카드(border-foreground/30)와 같은 농도. Card 외곽선은 ring이라 ring으로 */}
+              <Card className="gap-0 p-4 transition-shadow hover:ring-foreground/30 sm:p-5">
+                <Link href={`/card-detail/${w.id}`}>
                   {/* 조판은 560×700 고정, 목록에서는 scale로만 축소 (DESIGN.md §카드 조판) */}
                   {/* 상세로 morph (ANIMATION.md #3) */}
                   <CardTransition id={w.id}>
