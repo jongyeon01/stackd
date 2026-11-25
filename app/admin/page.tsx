@@ -83,7 +83,7 @@ export default async function AdminPage({
       <p className="mt-4 text-sm">
         <Link
           href={showAll ? "/admin" : "/admin?all=1"}
-          className="inline-block py-2.5 underline underline-offset-4"
+          className="inline-block py-2.5 underline decoration-muted-foreground/40 underline-offset-4 transition-colors hover:decoration-foreground"
         >
           {showAll ? "미처리만 보기" : "전체 보기"}
         </Link>
@@ -151,7 +151,7 @@ function TargetCard({ workflow: w }: { workflow: Workflow }) {
           href={`/card-detail/${w.id}`}
           target="_blank"
           rel="noopener noreferrer"
-          className="py-2.5 underline underline-offset-4"
+          className="py-2.5 underline decoration-muted-foreground/40 underline-offset-4 transition-colors hover:decoration-foreground"
         >
           상세 열기
         </Link>
@@ -162,7 +162,7 @@ function TargetCard({ workflow: w }: { workflow: Workflow }) {
       )}
 
       <details className="mt-2">
-        <summary className="cursor-pointer py-2 text-sm text-muted-foreground">전문 보기</summary>
+        <summary className="cursor-pointer py-2 text-sm text-muted-foreground transition-colors hover:text-foreground">전문 보기</summary>
         <p className="mt-2 whitespace-pre-wrap text-sm leading-[1.75]">{w.situation}</p>
         <ol className="mt-3 space-y-2 text-sm leading-[1.75]">
           {w.steps.map((s, i) => (

@@ -184,7 +184,7 @@ export default function WorkflowBuilder({ initial }: Props) {
               {TOPICS.map((t) => (
                 <label key={t} className="cursor-pointer">
                   <input type="radio" name="topic" value={t} checked={d.topic === t} onChange={() => setD({ ...d, topic: t })} className="peer sr-only" />
-                  <span className="inline-flex h-9 items-center rounded-full border border-border px-4 text-sm peer-checked:border-foreground peer-checked:bg-foreground peer-checked:text-background peer-focus-visible:ring-3 peer-focus-visible:ring-ring/50">
+                  <span className="inline-flex h-9 items-center rounded-full border border-border px-4 text-sm transition-colors hover:border-foreground/40 peer-checked:border-foreground peer-checked:bg-foreground peer-checked:text-background peer-focus-visible:ring-3 peer-focus-visible:ring-ring/50">
                     {TOPIC_LABELS[t]}
                   </span>
                 </label>
@@ -203,7 +203,7 @@ export default function WorkflowBuilder({ initial }: Props) {
 
           {/* 상세 템플릿 (EL-HOME-028~031, BR-028) — 선택이라 접어 둔다. 값이 있으면 펼친 채로 */}
           <details className="group rounded-lg border border-border px-4 py-3" open={DETAIL_FIELDS.some((k) => d[k]) || undefined}>
-            <summary className="cursor-pointer text-sm font-medium">자세히 적기 (선택) — 예상 결과·준비물·주의사항·확인 환경</summary>
+            <summary className="cursor-pointer text-sm font-medium underline-offset-4 hover:underline">자세히 적기 (선택) — 예상 결과·준비물·주의사항·확인 환경</summary>
             <div className="mt-4 grid gap-5">
               {DETAIL_UI.map(({ key, label, rows }) => (
                 <div key={key} className="grid gap-2">
