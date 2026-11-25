@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { ArrowUpRight, Copy, PenLine, Search, Share2 } from "lucide-react";
+import { ArrowUpRight, ChevronDown, Copy, PenLine, Search, Share2 } from "lucide-react";
 import DraftBanner from "@/components/draft-banner";
 import JsonLd from "@/components/json-ld";
 import { buttonVariants } from "@/components/ui/button";
@@ -24,7 +24,8 @@ export const metadata: Metadata = {
   openGraph: { ...BASE_OG, title: TITLE, description: DESCRIPTION, url: "/" },
 };
 
-const LIST_COLUMNS = "id, title, situation_short, steps, dev_stack, topic, author_handle";
+// role·accent는 히어로 좌우 WorkflowCard용
+const LIST_COLUMNS = "id, title, situation_short, steps, dev_stack, topic, author_handle, role, accent";
 
 // 사용 방법 4단계 (EL-LAND-006 · CPY-LAND-015~018) — 3번 "만들기"는 사용자 추가
 const HOW = [
@@ -52,6 +53,8 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ e
     .order("created_at", { ascending: false })
     .limit(6);
   const latest = data ?? [];
+  // 히어로 좌우 2장 — 가운데 0번 카드와 같은 DB 사본은 제외 (0~2장)
+  const side = latest.filter((w) => w.title !== HERO_CARD.title).slice(0, 2);
 
   return (
     <main className="flex-1">
@@ -87,22 +90,20 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ e
       {/* 초안 보유자는 빌더(`/create`)로 이어서 쓰기 (SCR-009 §11 #4) */}
       <DraftBanner href="/create" />
 
-      {/* EL-LAND-002·003 히어로 */}
+      {/* EL-LAND-002·003 히어로 — 가운데 정렬 텍스트 + 카드 3장 부채꼴 (2026-11-25 시안) */}
       <section aria-labelledby="hero-title" className="overflow-hidden">
-        <div className="container-page grid items-center gap-12 py-14 sm:py-20 lg:grid-cols-[minmax(0,1fr)_auto] lg:gap-10">
-          <div>
-            {/* 3행 한 줄 유지: 모바일 vw 축소, 상한 48px */}
-            <h1 id="hero-title" className="text-[min(3rem,8.5vw)] leading-[1.2] tracking-[-0.02em]">
+        <div className="container-page pt-14 pb-6 sm:pt-20">
+          <div className="text-center">
+            {/* 2행 전체 액센트 — 좁은 화면은 keep-all로 어절 단위 줄바꿈 */}
+            <h1 id="hero-title" className="text-[min(3.5rem,8.5vw)] leading-[1.2] tracking-[-0.02em]">
               AI 도구는 많은데,
               <br />
-              <span className="text-primary">어떻게 조합하고</span>
-              <br />
-              활용해야 할지 모르겠다면.
+              <span className="text-primary">어떻게 조합하고 활용해야 할지 모르겠다면.</span>
             </h1>
-            <p className="mt-6 max-w-[46ch] text-lg leading-[1.75] text-muted-foreground">
+            <p className="mx-auto mt-6 max-w-[46ch] text-lg leading-[1.75] text-muted-foreground">
               다른 개발자들은 어떤 도구를, 어떤 순서로 사용할까요? 실제 AI 워크플로우를 발견하고 내 작업 방식으로 만들어 보세요.
             </p>
-            <div className="mt-8 flex flex-wrap gap-3">
+            <div className="mt-8 flex flex-wrap justify-center gap-3">
               <Link href="/workflows" className={buttonVariants({ size: "lg", className: "h-12 px-6 text-base" })}>
                 워크플로우 탐색하기 <ArrowUpRight aria-hidden />
               </Link>
@@ -112,23 +113,52 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ e
             </div>
           </div>
 
-          {/* 0번 카드 — 겹친 판 위에 살짝 기울여 "카드 묶음"으로 (시안 구성, 복제 링크는 2026-11-23 사용자 요청으로 제거) */}
-          {/* lg mr: 6° 뒤판 돌출분(560×700 기준 35px×s)만큼 당겨 콘텐츠 끝선에 맞춤 */}
-          <div aria-label="예시 워크플로우 카드" role="group" className="relative mx-auto [--s:0.56] sm:[--s:0.66] lg:[--s:0.7] lg:mr-[calc(35px*var(--s))]">
-            <div aria-hidden className="absolute inset-x-0 top-0 h-[calc(700px*var(--s))] -rotate-6 rounded-xl border border-border bg-muted" />
-            <div className="relative rotate-2 overflow-hidden rounded-xl shadow-[0_24px_48px_-24px_rgba(17,20,25,0.35)]">
-              <div className="h-[calc(700px*var(--s))] w-[calc(560px*var(--s))] overflow-hidden">
-                <div className="origin-top-left [transform:scale(var(--s))]">
-                  <WorkflowCard workflow={HERO_CARD} handle="kjjyyy01" className="shadow-none" />
+          {/* 카드 무대 — 모바일(sm 미만)은 숨김, 좌우는 lg 이상. 좌우까지 콘텐츠 폭 안에 들어오게 배율을 잡는다 */}
+          <div className="relative mt-14 hidden pb-[calc(48px*var(--s))] sm:block sm:[--s:0.66] lg:[--s:0.6] xl:[--s:0.7]">
+            {side.map((w, i) => (
+              // 좌우 = 최신 공개 카드 — 아래 목록과 같은 데이터라 장식 처리(링크·낭독 없음)
+              <div
+                key={w.id}
+                aria-hidden
+                className={`absolute top-[calc(56px*var(--s))] hidden lg:block ${
+                  i === 0
+                    ? "right-[calc(50%+190px*var(--s))] origin-bottom-right -rotate-[8deg]"
+                    : "left-[calc(50%+190px*var(--s))] origin-bottom-left rotate-[8deg]"
+                }`}
+              >
+                <div className="h-[calc(630px*var(--s))] w-[calc(504px*var(--s))] overflow-hidden rounded-xl">
+                  <div className="origin-top-left [transform:scale(calc(var(--s)*0.9))]">
+                    <WorkflowCard workflow={w} handle={w.author_handle} />
+                  </div>
                 </div>
+              </div>
+            ))}
+
+            {/* 가운데 = 0번 카드 (복제 링크는 2026-11-23 사용자 요청으로 제거) */}
+            <div
+              aria-label="예시 워크플로우 카드"
+              role="group"
+              className="relative z-10 mx-auto h-[calc(700px*var(--s))] w-[calc(560px*var(--s))] overflow-hidden rounded-xl shadow-[0_24px_48px_-24px_rgba(17,20,25,0.35)]"
+            >
+              <div className="origin-top-left [transform:scale(var(--s))]">
+                <WorkflowCard workflow={HERO_CARD} handle="kjjyyy01" className="shadow-none" />
               </div>
             </div>
           </div>
+
+          {/* 아래 검색으로 내려가는 힌트 */}
+          <a
+            href="#search-title"
+            aria-label="검색으로 이동"
+            className="mx-auto mt-4 flex size-11 items-center justify-center rounded-full text-muted-foreground transition-colors hover:text-foreground focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none"
+          >
+            <ChevronDown aria-hidden className="size-6" />
+          </a>
         </div>
       </section>
 
       {/* EL-LAND-004·008 주제·검색 */}
-      <section aria-labelledby="search-title" className="border-t border-border bg-card py-10 sm:py-12">
+      <section aria-labelledby="search-title" className="bg-card py-10 sm:py-12">
         <div className="container-page grid gap-5">
           <h2 id="search-title" className="text-xl sm:text-2xl">지금 어떤 작업을 하고 있나요?</h2>
           <SearchForm />
