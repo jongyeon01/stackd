@@ -46,7 +46,8 @@ export default function DraftBanner({ editId, href }: Props) {
     <div role="status" className="border-b border-border bg-card">
       <div className="container-page flex flex-wrap items-center gap-3 py-3">
         <p className="flex-1 text-sm">작성하던 워크플로우가 있어요 — 이어서 쓸까요?</p>
-        <Button type="button" size="sm" onClick={() => act("restore")}>이어서 쓰기</Button>
+        {/* soft — 헤더 로그인과 같은 보조 행동 무게 */}
+        <Button type="button" size="sm" variant="soft" onClick={() => act("restore")}>이어서 쓰기</Button>
         <Button type="button" size="sm" variant="outline" onClick={() => act("discard")}>새로 시작</Button>
       </div>
     </div>

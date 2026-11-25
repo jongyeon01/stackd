@@ -19,7 +19,8 @@ function LoginForm({ className }: { className?: string }) {
   return (
     <form action={signInWithGitHub} className={className}>
       <input type="hidden" name="next" value="/" />
-      <Button type="submit" size="lg">
+      {/* soft — 페이지 주 CTA(solid)보다 한 단계 낮다 */}
+      <Button type="submit" size="lg" variant="soft">
         GitHub으로 로그인
       </Button>
     </form>
