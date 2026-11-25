@@ -206,9 +206,6 @@ export default async function CardDetailPage({ params }: Params) {
               이 카드는 신고 검토로 숨겨졌어요 — 사유: {wf.hidden_reason}. 문의는 하단 링크로
             </Badge>
           )}
-          {isOwner && !wf.hidden && !wf.is_public && (
-            <Badge variant="secondary">이 카드는 비공개예요 — 나만 볼 수 있어요</Badge>
-          )}
 
           {/* EL-WF-005 작성자 — 이메일 미노출, GitHub 프로필로만 (BR-025) */}
           <div className="mt-6 flex items-center gap-3">
