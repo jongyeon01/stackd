@@ -51,6 +51,7 @@
 | 5 | 갤러리 그리드 진입 | Stagger | mount 시 fade-up y 16px·0.5s·**60ms stagger** `enter` (`grid-stagger.tsx`) — 컷 권고(morph 페어 충돌 우려)였으나 **2026-08-30 프리뷰 본인 눈 판정으로 채택**, 충돌 미관측 |
 | 6 | 홈 과정 레일 (쇼케이스는 2026-11-22 제거) | Scroll reveal (Slide in) | `[data-reveal="left|right"]` 요소별 트리거(`top 75%`·once) 가로 슬라이드 **x 64px·0.7s** `enter` — 레일 단계: 좌우 교차. 빈 값은 fade-up 폴백. 섹션 overflow-hidden 필수(모바일 패딩 16px < x) (2026-08-30 fade-up→가로 슬라이드, 강도 24px→64px·80%→75% 상향 — 둘 다 사용자 눈 판정) |
 | 7 | 랜딩 히어로 텍스트 (2026-11-25) | Text Mask Reveal | **CSS keyframes만**(GSAP 미사용 — 사용자 결정). 정한 줄 단위(h1 1행·2행·부제) `overflow-hidden` 창 안에서 `translateY(100%)→0` 0.8s `enter`, 지연 0/100/250ms(`--delay` 변수) · CTA는 마스크 없이 fade-up y16 0.6s +400ms(테두리·포커스 링 보호) · reduce 시 `animation: none`(전역 규칙은 지연을 남겨 숨김 상태가 생김) · 서버 컴포넌트 유지, 텍스트를 쪼개지 않아 낭독 1문장 |
+| 8 | 랜딩 히어로 카드 (2026-11-25) | Center-Out Reveal | **CSS keyframes만**. 가운데 `card-rise` y48+opacity → 0, **+450ms** / 좌우 `card-fan` 가운데 쪽 `--from-x ±64px`+y24+opacity → 0, **+600ms**(150ms 시간차) — 각 0.6s `enter`. 텍스트(#7) 리듬을 이어 받아 전체 종료 **1.2s = 오케스트레이션 상한**. 기울기는 Tailwind `rotate`(별도 속성)라 transform 키프레임과 합성돼 유지 · reduce 시 `animation: none` · 모바일(sm 미만)은 무대 숨김이라 해당 없음 |
 
 **기각** (find-animation-opportunities 게이트): 헤더 내비(고빈도 — 금지) · tool-picker(입력 동선 즉각 반응 원칙) · draft-banner(레이아웃 미는 배너라 등장 모션이 본문 점프를 연출) · 상세 단계 목록 리빌(읽는 콘텐츠) · Radix 계열(기본 모션 존재) · 빌더 단계 추가/삭제(마이크로 — backlog).
 

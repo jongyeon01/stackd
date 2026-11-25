@@ -130,6 +130,17 @@
 .mask-up { animation: mask-up 0.8s cubic-bezier(0.215, 0.61, 0.355, 1) var(--delay, 0ms) both; }
 .fade-up { animation: fade-up 0.6s cubic-bezier(0.215, 0.61, 0.355, 1) var(--delay, 0ms) both; }
 
+/* 히어로 카드 Center-Out (ANIMATION.md #8) — 가운데가 먼저 오르고 좌우가 가운데 뒤에서 펼쳐진다.
+   기울기는 Tailwind rotate(별도 속성)라 transform 키프레임과 합성돼 유지된다 */
+@keyframes card-rise {
+  from { transform: translateY(48px); opacity: 0; }
+}
+@keyframes card-fan {
+  from { transform: translate(var(--from-x, 0px), 24px); opacity: 0; }
+}
+.card-rise { animation: card-rise 0.6s cubic-bezier(0.215, 0.61, 0.355, 1) var(--delay, 0ms) both; }
+.card-fan { animation: card-fan 0.6s cubic-bezier(0.215, 0.61, 0.355, 1) var(--delay, 0ms) both; }
+
 /* 모션은 상태 전이만 — 그것도 끄고 싶다는 사용자는 끈다 */
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
@@ -140,7 +151,9 @@
   }
   /* 전역 규칙은 지연을 남겨 both 채움으로 텍스트가 숨는다 — 히어로 리빌은 아예 끈다 */
   .mask-up,
-  .fade-up {
+  .fade-up,
+  .card-rise,
+  .card-fan {
     animation: none !important;
   }
   /* ::view-transition-*는 * 셀렉터 밖 — 명시로 끈다 (ANIMATION.md) */
