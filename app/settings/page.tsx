@@ -1,9 +1,7 @@
 import type { Metadata } from "next";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { redirect } from "next/navigation";
-import { signOut } from "@/app/auth/actions";
-import { DeleteAccountForm } from "@/components/settings-forms";
-import { Button } from "@/components/ui/button";
+import { DeleteAccountForm, LogoutForm } from "@/components/settings-forms";
 import { createClient } from "@/lib/supabase/server";
 
 // SCR-008 메타 — 계정 화면이라 색인 제외 (PRD-04)
@@ -38,12 +36,8 @@ export default async function SettingsPage() {
           <span className="font-mono text-sm">@{handle}</span>
         </section>
 
-        {/* EL-SET-004 로그아웃 — 서버 액션 폼이라 JS 없이도 동작한다 (§13) */}
-        <form action={signOut}>
-          <Button type="submit" variant="outline" className="h-11 px-5">
-            로그아웃
-          </Button>
-        </form>
+        {/* EL-SET-004 로그아웃 — 확인 dialog를 거친다 (확인 단계가 JS라 무JS 폼은 포기) */}
+        <LogoutForm />
 
         <DeleteAccountForm handle={handle} />
       </div>
