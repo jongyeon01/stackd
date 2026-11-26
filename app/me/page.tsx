@@ -162,17 +162,15 @@ async function SavedTab({ userId }: { userId: string }) {
       ) : (
         <ul className="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {rows.map(({ id, w }) => (
-            <li key={id} className="grid gap-3">
+            // li·해제 버튼은 BookmarkRemove가 그린다 — 해제 시 행을 즉시 숨기려고
+            <BookmarkRemove key={id} id={id}>
               {/* 대상이 비공개·hidden이 됐으면 내용 대신 안내 (EL-ME-013 · CPY-ME-009) — 소유자 본인 것은 보이지만 저장 대상이 아니다 */}
               {w && w.is_public && !w.hidden ? (
                 <WorkflowListCard w={w} />
               ) : (
                 <p className="rounded-xl border border-dashed border-border p-5 text-sm text-muted-foreground">지금은 볼 수 없는 워크플로우예요</p>
               )}
-              <div className="justify-self-end">
-                <BookmarkRemove id={id} />
-              </div>
-            </li>
+            </BookmarkRemove>
           ))}
         </ul>
       )}
