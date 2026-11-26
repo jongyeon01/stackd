@@ -24,7 +24,7 @@ type Props = {
   children?: ReactNode; // 본문 추가 입력 영역
 };
 
-// 확인 dialog 공통 틀 — 탈퇴·로그아웃 (상태는 호출부가 소유)
+// 확인 dialog 공통 틀 — 탈퇴·로그아웃·카드 삭제·로그인 안내 (상태는 호출부가 소유)
 export default function ConfirmDialog({
   open,
   onOpenChange,
