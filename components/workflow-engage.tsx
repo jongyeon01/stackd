@@ -7,14 +7,7 @@ import { toast } from "sonner";
 import { forkWorkflow, toggleBookmark } from "@/app/actions/workflow";
 import { signInWithGitHub } from "@/app/auth/actions";
 import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+import ConfirmDialog from "@/components/confirm-dialog";
 import { track } from "@/lib/analytics";
 
 type Props = { id: string; loggedIn: boolean; bookmarked: boolean };
@@ -27,6 +20,7 @@ export default function WorkflowEngage({ id, loggedIn, bookmarked }: Props) {
   const params = useSearchParams();
   const [saved, setSaved] = useState(bookmarked); // 낙관적 값 — 실패하면 되돌린다
   const [pending, startTransition] = useTransition();
+  const [signingIn, startSignIn] = useTransition(); // 로그인 이동 중 버튼 잠금
   const [gateAct, setGateAct] = useState<Act | null>(null); // 로그인 안내 dialog 대상 (EL-WF-017)
   const ran = useRef(false);
 
@@ -100,26 +94,19 @@ export default function WorkflowEngage({ id, loggedIn, bookmarked }: Props) {
         저장은 원본을 보관함에 담고, 복제는 내 워크플로우로 가져와 고칠 수 있어요
       </p>
       {/* EL-WF-017 로그인 안내 — 헤더와 같은 서버 액션, 복귀 주소에 act를 실어 돌아오면 1회 실행 */}
-      <Dialog open={gateAct !== null} onOpenChange={(open) => !open && setGateAct(null)}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>로그인이 필요해요</DialogTitle>
-            <DialogDescription>
-              {actLabel}하려면 GitHub 로그인이 필요해요. 로그인 후 이 페이지로 돌아와 바로 {actLabel}돼요.
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter>
-            {/* 터치 타깃 44px (DESIGN.md §접근성) — dialog 기본 버튼은 32px */}
-            <Button variant="outline" onClick={() => setGateAct(null)} className="h-11 px-5">
-              취소
-            </Button>
-            <form action={signInWithGitHub} className="w-full sm:w-auto">
-              <input type="hidden" name="next" value={`${pathname}?act=${gateAct ?? "bookmark"}`} />
-              <Button type="submit" className="h-11 w-full px-5">GitHub으로 로그인</Button>
-            </form>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      <ConfirmDialog
+        open={gateAct !== null}
+        onOpenChange={(open) => !open && setGateAct(null)}
+        title="로그인이 필요해요"
+        description={`${actLabel}하려면 GitHub 로그인이 필요해요. 로그인 후 이 페이지로 돌아와 바로 ${actLabel}돼요.`}
+        confirmLabel="GitHub으로 로그인"
+        onConfirm={() => {
+          const fd = new FormData();
+          fd.set("next", `${pathname}?act=${gateAct ?? "bookmark"}`);
+          startSignIn(() => signInWithGitHub(fd));
+        }}
+        pending={signingIn}
+      />
     </div>
   );
 }
