@@ -7,14 +7,7 @@ import { toast } from "sonner";
 import { deleteWorkflow, togglePublic } from "@/app/actions/workflow";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+import ConfirmDialog from "@/components/confirm-dialog";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 
@@ -98,22 +91,16 @@ export default function MyCardActions({ id, isPublic, hidden, hiddenReason }: Pr
       </div>
 
       {/* EL-ME-007 삭제 확인 (CPY-WF-011) */}
-      <Dialog open={confirming} onOpenChange={setConfirming}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>정말 삭제할까요? 되돌릴 수 없어요</DialogTitle>
-            <DialogDescription>삭제하면 이 링크를 받은 사람도 더는 볼 수 없어요.</DialogDescription>
-          </DialogHeader>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setConfirming(false)}>
-              취소
-            </Button>
-            <Button variant="destructive" onClick={remove} disabled={pending}>
-              삭제
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      <ConfirmDialog
+        open={confirming}
+        onOpenChange={setConfirming}
+        title="정말 삭제할까요? 되돌릴 수 없어요"
+        description="삭제하면 이 링크를 받은 사람도 더는 볼 수 없어요."
+        confirmLabel="삭제"
+        onConfirm={remove}
+        pending={pending}
+        destructive
+      />
     </div>
   );
 }
