@@ -19,7 +19,8 @@ export default function WorkflowEngage({ id, loggedIn, bookmarked }: Props) {
   const pathname = usePathname();
   const params = useSearchParams();
   const [saved, setSaved] = useState(bookmarked); // 낙관적 값 — 실패하면 되돌린다
-  const [pending, startTransition] = useTransition();
+  const [pending, startTransition] = useTransition(); // 복제 전용
+  const [bookmarking, startBookmark] = useTransition(); // 저장 전용 — 복제 버튼을 잠그지 않게
   const [signingIn, startSignIn] = useTransition(); // 로그인 이동 중 버튼 잠금
   const [gateAct, setGateAct] = useState<Act | null>(null); // 로그인 안내 dialog 대상 (EL-WF-017)
   const ran = useRef(false);
@@ -38,8 +39,10 @@ export default function WorkflowEngage({ id, loggedIn, bookmarked }: Props) {
   }
 
   function bookmark(on: boolean) {
-    setSaved(on);
-    startTransition(async () => {
+    // 요청 중 재클릭은 무시 — 버튼을 흐리지 않으면서 on/off 요청 순서 꼬임을 막는다
+    if (bookmarking) return;
+    setSaved(on); // 낙관적 반영 — 공개 전환과 같은 패턴
+    startBookmark(async () => {
       const r = await toggleBookmark(id, on).catch(() => ({ ok: false }));
       if (!r.ok) {
         setSaved(!on); // 롤백 (REQ-WF-009 AC-2·3)
@@ -78,7 +81,6 @@ export default function WorkflowEngage({ id, loggedIn, bookmarked }: Props) {
         <Button
           variant="outline"
           aria-pressed={saved}
-          disabled={pending}
           onClick={() => (loggedIn ? bookmark(!saved) : gate("bookmark"))}
           className="h-11 px-6"
         >
